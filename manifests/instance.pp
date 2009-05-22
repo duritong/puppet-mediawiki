@@ -85,6 +85,8 @@ define mediawiki::instance(
       dst_path => $real_path,
       owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
     }
+  } else {
+    mediawiki::file{"${real_path}/Wiki.png": src_path => $basedir, }
   }
 
   case $config {
