@@ -9,4 +9,15 @@
 # the Free Software Foundation.
 #
 
-class mediawiki {}
+# Variables:
+# - mediawiki_install_src: The source of mediawiki
+#   git: clone it from a git repository (Requires mediawiki_git_src)
+#   default: install it by package
+#
+# - mediawiki_git_src: Git Repository from where to install the mediawiki
+class mediawiki {
+  case $mediawiki_install_src {
+    'git': { include mediawiki::git }
+    default: { include mediawiki::base }
+  }
+}
