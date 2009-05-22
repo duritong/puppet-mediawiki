@@ -36,11 +36,11 @@ $wgArticlePath      = "$wgScript/$1";
 # $wgArticlePath      = "$wgScript?title=$1";
 
 #$wgStyleDirectory   = "$IP/stylesheets";
-<% unless image.to_s == 'absent' -%>
+<%- unless image.to_s == 'absent' -%>
 $wgLogo             = "/<%= image %>";
-<% else -%>
+<%- else -%>
 $wgLogo             = "/skins/monobook/headbg.jpg";
-<% end -%>
+<%- end -%>
 
 $wgEnableEmail = true;
 $wgEnableUserEmail = false;
@@ -133,17 +133,17 @@ $wgRightsIcon = "${wgStylePath}/common/images/gnu-fdl.png";
 # $wgRightsCode = "gfdl"; # Not yet used
 
 $wgDiff3 = "";
-<% unless squid_servers.to_s == 'absent' -%>
+<%- unless squid_servers.to_s == 'absent' -%>
 
 $wgUseSquid = true;
 $wgSquidServers = array(<%= squid_servers %>);
-<% end -%>
+<%- end -%>
 
 # enable extensions
 require_once('extensions/ssl_login.php');
-<% unless extensions.to_s == 'absent' -%>
-<% extensions.split(':').each do |extension| -%>
+<%- unless extensions.to_s == 'absent' -%>
+<%- extensions.split(':').each do |extension| -%>
 require_once( "extensions/<%= extension %>.php" );
-<% end -%>
-<% end -%>
+<%- end -%>
+<%- end -%>
 ?>
