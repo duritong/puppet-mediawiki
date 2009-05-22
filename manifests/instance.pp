@@ -38,7 +38,7 @@ define mediawiki::instance(
   $sitename = 'unmanaged',
   $secret_key = 'unmanaged',
   $squid_servers = 'absent',  
-  $exentions = 'absent',
+  $extensions = 'absent',
   $language = 'de',
   $documentroot_owner = root,
   $documentroot_group = apache,
