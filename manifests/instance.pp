@@ -114,11 +114,11 @@ define mediawiki::instance(
         }
         file{
           "${real_path}/AdminSettings.php":
-            content => template('mediawiki/configs/AdminSettings.php.erb'),
+            content => template('mediawiki/config/AdminSettings.php.erb'),
             require => Mediawiki::File["${real_path}/index.php"],
             owner => root, group => 0, mode => 0400;
           "${real_path}/LocalSettings.php":
-            content => template('mediawiki/configs/LocalSettings.php.erb'),
+            content => template('mediawiki/config/LocalSettings.php.erb'),
             require => Mediawiki::File["${real_path}/index.php"],
             owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
         }
