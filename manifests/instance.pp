@@ -69,11 +69,11 @@ define mediawiki::instance(
       recurse => true,
       purge => true,
       force => true,
-      owner => $documentroot_owner, group => documentroot_group, mode => $documentroot_mode;
+      owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
     }
     file{ [ "${real_path}/images", "${real_path}/cache" ]:
       ensure => directory,
-      owner => $documentroot_owner, group => documentroot_group, mode => $documentroot_write_mode;
+      owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_write_mode;
     }
 
     mediawiki::file{
