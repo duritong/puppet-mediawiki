@@ -81,7 +81,7 @@ define mediawiki::instance(
         "${real_path}/redirect.php", "${real_path}/trackback.php", "${real_path}/includes", "${real_path}/redirect.phtml",
         "${real_path}/wiki.phtml", "${real_path}/index.php", "${real_path}/math", "${real_path}/skins",
         "${real_path}/extensions", "${real_path}/install-utils.inc", "${real_path}/opensearch_desc.php5",
-        "${real_path}/StartProfiler.php" ]:
+        "${real_path}/serialized", "${real_path}/StartProfiler.php" ]:
       src_path => $basedir,
     }
 
