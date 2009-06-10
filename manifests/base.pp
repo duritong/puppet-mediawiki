@@ -3,9 +3,9 @@ class mediawiki::base {
     ensure => present,
   }
 
-  file{'/opt/bin/mediawiki_dbupgrade.rb':
-    source => [ "puppet://$server/files/mediawiki/upgradescript/mediawiki_dbupgrade.rb",
-                "puppet://$server/mediawiki/upgradescript/mediawiki_dbupgrade.rb" ],
+  file{'/opt/bin/mediawiki_dbupdate.rb':
+    source => [ "puppet://$server/files/mediawiki/updatescript/mediawiki_dbupdate.rb",
+                "puppet://$server/mediawiki/updatescript/mediawiki_dbupdate.rb" ],
     owner => root, group => 0, mode => 0700;
   }
 }
