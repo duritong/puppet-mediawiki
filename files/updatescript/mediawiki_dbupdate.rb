@@ -3,6 +3,8 @@
 MEDIAWIKI_SOURCE = '/var/www/mediawiki'
 VHOSTS_BASE = '/var/www/vhosts'
 
+USER_HOST = '127.0.0.1'
+
 #########################################
 
 require 'rubygems'
@@ -29,22 +31,20 @@ def get_db_info(dir)
 end
 
 def grant(dbh, dbname, dbuser)
-  dbh.query("GRANT #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* TO '#{dbh.quote(dbuser)}'@'127.0.0.1';")
+  dbh.query("GRANT #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* TO '#{dbh.quote(dbuser)}'@'#{USER_HOST}';")
 end
 
 def revoke(dbh, dbname, dbuser)
-  dbh.query("REVOKE #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* FROM '#{dbh.quote(dbuser)}'@'127.0.0.1';")
+  dbh.query("REVOKE #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* FROM '#{dbh.quote(dbuser)}'@'#{USER_HOST}';")
 end
 
 def update_php(dir)
   old_dir = Dir.getwd
   Dir.chdir(dir)
-  File.move("#{dir}/maintenance #{dir}/maintenance_old")
-  FileUtils.cp_r("#{MEDIAWIKI_SOURCE}/maintenance #{dir}/maintenance")
+  FileUtils.cp_r("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
   result = `php maintenance/update.php --quick`.split("\n")
   result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} 
   FileUtils.remove_entry_secure("#{dir}/maintenance", true)
-  File.move("#{dir}/maintenance_old #{dir}/maintenance")
   Dir.chdir(old_dir)
 end
 
