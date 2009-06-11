@@ -9,7 +9,7 @@ class mediawiki::base {
   file{'/opt/bin/mediawiki_dbupdate.rb':
     source => [ "puppet://$server/files/mediawiki/updatescript/mediawiki_dbupdate.rb",
                 "puppet://$server/mediawiki/updatescript/mediawiki_dbupdate.rb" ],
-    require => [ Package['ruby-mysql'], Package['rubygems-highline'] ],
+    require => [ Package['ruby-mysql'], Package['rubygem-highline'] ],
     owner => root, group => 0, mode => 0700;
   }
 }
