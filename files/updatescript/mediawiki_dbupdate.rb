@@ -53,7 +53,7 @@ end
 def connect_db()
   user = ask("Enter db user name with global grant privileges: ")
   passwd = ask("Enter your password:  ") { |q| q.echo = "x" }
-  dbh = Mysql.real_connect("dbhost", user, passwd)
+  dbh = Mysql.real_connect(DB_HOST, user, passwd)
   puts "Server version: " + dbh.get_server_info
   return dbh
 end
