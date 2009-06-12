@@ -15,7 +15,7 @@ class mediawiki::base {
   }
   file{'/opt/bin/mediawiki_dbupdate.rb':
     source => "puppet://$server/mediawiki/updatescript/mediawiki_dbupdate.rb",
-    require => File['/opt/bin/mediawiki_dbupdate.rb'],
+    require => File['/opt/bin/mediawiki_dbupdate.config.rb'],
     owner => root, group => 0, mode => 0700;
   }
 }
