@@ -1,17 +1,12 @@
 #!/usr/bin/ruby -w
 
-MEDIAWIKI_SOURCE = '/var/www/mediawiki'
-VHOSTS_BASE = '/var/www/vhosts'
-
-USER_HOST = '127.0.0.1'
-
-#########################################
-
 require 'rubygems'
 require 'highline/import'
 require 'ftools'
 require 'fileutils'
 require 'mysql'
+
+load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
 
 $perms = 'CREATE,ALTER,INDEX,DROP,CREATE TEMPORARY TABLES,CREATE VIEW,SHOW VIEW,CREATE ROUTINE,ALTER ROUTINE,EXECUTE'
 
