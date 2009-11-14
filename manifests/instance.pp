@@ -55,7 +55,7 @@ define mediawiki::instance(
   }
 
   case $path {
-    'absent': { $real_path = "/var/www/vhosts/${name}/www/" }
+    'absent': { $real_path = "/var/www/vhosts/${name}/www" }
     default: { $real_path = $path }
   }
 
