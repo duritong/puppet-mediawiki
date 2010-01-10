@@ -129,6 +129,10 @@ $wgUseSquid = true;
 $wgSquidServers = array(<%= squid_servers %>);
 <%- end -%>
 
+$wgUseFileCache = true; /* default: false */
+$wgFileCacheDirectory = "$IP/cache";
+$wgShowIPinHeader = false;
+
 # enable extensions
 require_once('extensions/ssl_login.php');
 <%- unless extensions.to_s == 'absent' -%>
