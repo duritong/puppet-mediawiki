@@ -40,6 +40,7 @@ define mediawiki::instance(
   $secret_key = 'unmanaged',
   $squid_servers = 'absent',
   $hashed_upload_dir = true,
+  $file_extensions = 'absent',
   $extensions = 'absent',
   $language = 'de',
   $documentroot_owner = root,

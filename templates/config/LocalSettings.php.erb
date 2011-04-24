@@ -23,11 +23,11 @@ $wgArticlePath      = "$wgScript/$1";
 # $wgArticlePath      = "$wgScript?title=$1";
 
 #$wgStyleDirectory   = "$IP/stylesheets";
-<%- unless image.to_s == 'absent' -%>
+<% unless image.to_s == 'absent' -%>
 $wgLogo             = "/<%= image %>";
-<%- else -%>
+<% else -%>
 $wgLogo             = "/Wiki.png";
-<%- end -%>
+<% end -%>
 
 $wgEnableEmail = true;
 $wgEnableUserEmail = false;
@@ -80,9 +80,9 @@ $wgUseImageResize       = true;
 ## images/temp, and make them all writable. Then uncomment
 ## this, if it's not already uncommented:
 #$wgHashedUploadDirectory = false;
-<%- unless hashed_upload_dir -%>
+<% unless hashed_upload_dir -%>
 $wgHashedUploadDirectory = false;
-<%- end -%>
+<% end -%>
 
 ## If you have the appropriate support software installed
 ## you can enable inline LaTeX equations:
@@ -110,7 +110,11 @@ $wgGroupPermissions['*']['createaccount'] = true;
 # Specify who may create new accounts: 0 means no, 1 means yes
 $wgWhitelistAccount = array ( 'user' => 0, 'sysop' => 1, 'developer' => 1 );
 
+<% if file_extensions.to_s == 'absent' -%>
 $wgFileExtensions = array( 'png', 'gif', 'jpg', 'jpeg', 'ogg', 'txt', 'pdf','patch','bz2', 'doc','zip', 'ods', 'odt', 'rtf' );
+<% else -%>
+$wgFileExtensions = array( '<%= file_extensions.join("', '") %>' );
+<% end -%>
 
 ## For attaching licensing metadata to pages, and displaying an
 ## appropriate copyright notice / icon. GNU Free Documentation
@@ -123,11 +127,11 @@ $wgRightsIcon = "${wgStylePath}/common/images/gnu-fdl.png";
 # $wgRightsCode = "gfdl"; # Not yet used
 
 $wgDiff3 = "";
-<%- unless squid_servers.to_s == 'absent' -%>
+<% unless squid_servers.to_s == 'absent' -%>
 
 $wgUseSquid = true;
 $wgSquidServers = array(<%= squid_servers %>);
-<%- end -%>
+<% end -%>
 
 $wgUseFileCache = true; /* default: false */
 $wgFileCacheDirectory = "$IP/cache";
@@ -135,9 +139,9 @@ $wgShowIPinHeader = false;
 
 # enable extensions
 require_once('extensions/ssl_login.php');
-<%- unless extensions.to_s == 'absent' -%>
-<%- extensions.split(':').each do |extension| -%>
+<% unless extensions.to_s == 'absent' -%>
+<% extensions.split(':').each do |extension| -%>
 require_once( "extensions/<%= extension %>.php" );
-<%- end -%>
-<%- end -%>
+<% end -%>
+<% end -%>
 ?>
