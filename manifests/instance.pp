@@ -83,7 +83,7 @@ define mediawiki::instance(
         "${real_path}/redirect.php", "${real_path}/trackback.php", "${real_path}/includes", "${real_path}/redirect.phtml",
         "${real_path}/wiki.phtml", "${real_path}/index.php", "${real_path}/math", "${real_path}/skins",
         "${real_path}/extensions", "${real_path}/install-utils.inc", "${real_path}/opensearch_desc.php",
-        "${real_path}/serialized", "${real_path}/StartProfiler.php" ]:
+        "${real_path}/serialized", "${real_path}/StartProfiler.php", "${real_path}/images/.htaccess", "${real_path}/cache/.htaccess" ]:
       src_path => $basedir,
     }
 
@@ -100,10 +100,6 @@ define mediawiki::instance(
     case $config {
       'file': {
         mediawiki::config{
-          'AdminSettings.php':
-            mediawiki_name => $name,
-            dst_path => $real_path,
-            owner => root, group => 0, mode => 0400;
           'LocalSettings.php':
             mediawiki_name => $name,
             dst_path => $real_path,
@@ -115,10 +111,6 @@ define mediawiki::instance(
           fail("you have to set all necessary variables for ${name} on ${fqdn} to deploy it in template mode!")
         }
         file{
-          "${real_path}/AdminSettings.php":
-            content => template('mediawiki/config/AdminSettings.php.erb'),
-            require => Mediawiki::File["${real_path}/index.php"],
-            owner => root, group => 0, mode => 0400;
           "${real_path}/LocalSettings.php":
             content => template('mediawiki/config/LocalSettings.php.erb'),
             require => Mediawiki::File["${real_path}/index.php"],

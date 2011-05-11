@@ -48,6 +48,8 @@ $wgDBserver         = "<%= db_server %>";
 $wgDBname           = "<%= db_name %>";
 $wgDBuser           = "<%= db_user %>";
 $wgDBpassword       = "<%= db_pwd %>";
+$wgDBadminuser      = "<%= db_user %>";
+$wgDBadminpassword  = "<%= db_pwd %>";
 $wgDBprefix         = "";
 
 ## To allow SQL queries through the wiki's Special:Askaql page,
@@ -136,6 +138,8 @@ $wgSquidServers = array(<%= squid_servers %>);
 $wgUseFileCache = true; /* default: false */
 $wgFileCacheDirectory = "$IP/cache";
 $wgShowIPinHeader = false;
+
+$wgMinimalPasswordLength = 8;
 
 # enable extensions
 require_once('extensions/ssl_login.php');
