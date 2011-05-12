@@ -8,8 +8,6 @@ require 'mysql'
 
 load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
 
-$perms = 'CREATE,ALTER,INDEX,DROP,CREATE TEMPORARY TABLES,CREATE VIEW,SHOW VIEW,CREATE ROUTINE,ALTER ROUTINE,EXECUTE'
-
 def match_vardecl(txt, var)
   m = txt.match(/\$#{var} *= *"(.*)"/)
   return m ? m[1] : nil  
@@ -25,14 +23,6 @@ def get_db_info(dir)
   return [dbname, dbuser]
 end
 
-def grant(dbh, dbname, dbuser)
-  dbh.query("GRANT #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* TO '#{dbh.quote(dbuser)}'@'#{USER_HOST}';")
-end
-
-def revoke(dbh, dbname, dbuser)
-  dbh.query("REVOKE #{dbh.quote($perms)} ON `#{dbh.quote(dbname)}`.* FROM '#{dbh.quote(dbuser)}'@'#{USER_HOST}';")
-end
-
 def update_php(dir)
   old_dir = Dir.getwd
   Dir.chdir(dir)
@@ -45,9 +35,7 @@ end
 
 def dbupdate(dir, dbh)
   dbname, dbuser = get_db_info(dir)
-  grant(dbh, dbname, dbuser)
   update_php(dir)  
-  revoke(dbh, dbname, dbuser)
 end
 
 def connect_db()
