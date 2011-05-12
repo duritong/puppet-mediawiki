@@ -38,7 +38,7 @@ def update_php(dir)
   Dir.chdir(dir)
   FileUtils.cp_r("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
   result = `php maintenance/update.php --quick`.split("\n")
-  result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} 
+  result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} unless result.empty?
   FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   Dir.chdir(old_dir)
 end
