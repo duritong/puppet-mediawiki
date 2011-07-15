@@ -67,7 +67,6 @@ define mediawiki::instance(
   } else {
     file{"${real_path}":
       ensure => directory,
-      source => "puppet:///modules/common/empty",
       recurse => true,
       purge => true,
       force => true,
