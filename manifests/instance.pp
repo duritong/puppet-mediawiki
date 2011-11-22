@@ -17,7 +17,7 @@
 #
 # squid_servers: if mediawiki should do caching for squid servers.
 #   - default: absent -> no squid caching enabled.
-#   - you need to supply and array string: "'192.168.1.10','192.168.1.11'"
+#   - you need to supply an array : ['192.168.1.10','192.168.1.11']
 #
 # extenstions: extensions to enable for the wiki
 #   - default: none

@@ -132,7 +132,7 @@ $wgDiff3 = "";
 <% unless squid_servers.to_s == 'absent' -%>
 
 $wgUseSquid = true;
-$wgSquidServers = array(<%= squid_servers %>);
+$wgSquidServers = array(<%= "'#{squid_servers.to_a.join("\', \'")}'" %>);
 <% end -%>
 
 $wgUseFileCache = true; /* default: false */
