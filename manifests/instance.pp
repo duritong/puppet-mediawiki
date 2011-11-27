@@ -110,7 +110,7 @@ define mediawiki::instance(
       }
       'template': {
         if ($db_server=='unmanaged') or ($db_name=='unmanaged') or ($db_user=='unmanaged') or ($db_pwd=='unmanaged') or ($contact=='unmanaged') or ($sitename=='unmanaged') or ($secret_key=='unmanaged'){
-          fail("you have to set all necessary variables for ${name} on ${fqdn} to deploy it in template mode!")
+          fail("you have to set all necessary variables for ${name} on ${fqdn} to deploy it in template mode! (db_server: ${db_server} - db_name: ${db_name} - db_user: ${db_user} - db_pwd: ${db_pwd} - contact: ${contact} - sitename: ${sitename} - secret_key: ${secret_key})")
         }
 
         case $secret_key {
