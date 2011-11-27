@@ -117,13 +117,13 @@ define mediawiki::instance(
           'trocla': { $real_secret_key = trocla("mediawiki_${name}_secret_key",'plain','length: 32') }
           default: { $real_secret_key = $secret_key }
         }
-        case $db_pwd {
-          'trocla': { $real_db_pwd = trocla("mysql_${db_user}",'plain') }
-          default: { $real_db_pwd = $db_pwd }
-        }
         case $db_user {
           'db_name': { $real_db_user = $db_name }
           default: { $real_db_user = $db_user }
+        }
+        case $db_pwd {
+          'trocla': { $real_db_pwd = trocla("mysql_${real_db_user}",'plain') }
+          default: { $real_db_pwd = $db_pwd }
         }
 
         file{
