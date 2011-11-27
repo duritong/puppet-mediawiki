@@ -46,10 +46,10 @@ $wgEmailAuthentication = false;
 
 $wgDBserver         = "<%= db_server %>";
 $wgDBname           = "<%= db_name %>";
-$wgDBuser           = "<%= db_user %>";
-$wgDBpassword       = "<%= db_pwd %>";
-$wgDBadminuser      = "<%= db_user %>";
-$wgDBadminpassword  = "<%= db_pwd %>";
+$wgDBuser           = "<%= real_db_user %>";
+$wgDBpassword       = "<%= real_db_pwd %>";
+$wgDBadminuser      = "<%= real_db_user %>";
+$wgDBadminpassword  = "<%= real_db_pwd %>";
 $wgDBprefix         = "";
 
 ## To allow SQL queries through the wiki's Special:Askaql page,
@@ -97,7 +97,7 @@ $wgLocalInterwiki   = $wgSitename;
 
 $wgLanguageCode = "<%= language %>";
 
-$wgSecretKey = "<%= secret_key %>";
+$wgSecretKey = "<%= real_secret_key %>";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
