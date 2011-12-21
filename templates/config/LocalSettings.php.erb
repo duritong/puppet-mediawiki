@@ -143,8 +143,8 @@ $wgMinimalPasswordLength = 8;
 
 # enable extensions
 require_once('extensions/ssl_login.php');
-<% unless extensions.to_s == 'absent' -%>
-<% extensions.split(':').each do |extension| -%>
+<% unless extensions == 'absent' -%>
+<% extensions.to_a.each do |extension| -%>
 require_once( "extensions/<%= extension %>.php" );
 <% end -%>
 <% end -%>
