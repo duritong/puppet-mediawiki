@@ -26,8 +26,8 @@ end
 def update_php(dir)
   old_dir = Dir.getwd
   Dir.chdir(dir)
-  FileUtils.cp_r("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
-  result = `php maintenance/update.php --quick`.split("\n")
+  File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
+  result = `php maintenance/update.php --quick --conf #{dir}/LocalSettings.php`.split("\n")
   result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} unless result.empty?
   FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   Dir.chdir(old_dir)
