@@ -43,6 +43,7 @@ define mediawiki::instance(
   $file_extensions = 'absent',
   $extensions = 'absent',
   $language = 'de',
+  $wiki_options = {},
   $documentroot_owner = root,
   $documentroot_group = apache,
   $documentroot_mode = 0640,
@@ -126,6 +127,13 @@ define mediawiki::instance(
           'trocla': { $real_db_pwd = trocla("mysql_${real_db_user}",'plain') }
           default: { $real_db_pwd = $db_pwd }
         }
+
+        $std_wiki_options = {
+          anyone_can_edit => false,
+          anyone_can_register => true,
+          email_authentication => false,
+        }
+        $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
         file{
           "${real_path}/LocalSettings.php":
