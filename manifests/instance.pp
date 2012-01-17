@@ -38,6 +38,7 @@ define mediawiki::instance(
   $contact = 'unmanaged',
   $sitename = 'unmanaged',
   $secret_key = 'unmanaged',
+  $autoinstall = true,
   $squid_servers = 'absent',
   $hashed_upload_dir = true,
   $file_extensions = 'absent',
@@ -140,6 +141,14 @@ define mediawiki::instance(
             content => template('mediawiki/config/LocalSettings.php.erb'),
             require => Mediawiki::File["${real_path}/index.php"],
             owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+        }
+        if $autoinstall {
+          $admin_pass = trocla("mediawiki_${name}_admin",'plain')
+          exec{"install_mediawiki_${name}":
+            command => "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass ${$real_db_pwd} --lang ${language} --pass ${admin_pass} --scriptpath / ${sitename} admin",
+            unless => "ruby -rrubygems -rmysql -e 'exit Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\").query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0'",
+            require => File["${real_path}/LocalSettings.php"];
+          }
         }
       }
     }
