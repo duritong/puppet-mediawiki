@@ -52,7 +52,7 @@ define mediawiki::instance(
 ){
   include ::mediawiki
 
-  case $mediawiki_install_src {
+  case $mediawiki::install_src {
     'git': { $basedir = '/var/www/mediawiki' }
     default: { $basedir = '/usr/share/mediawiki' }
   }
