@@ -149,7 +149,7 @@ require_once('extensions/ssl_login.php');
 require_once( "extensions/<%= extension %>.php" );
     end -%>
    end -%>
-<% if spam_protection -%>
+<% if spam_protection
      [ 'Math/Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
        unless extensions.to_a.include?(spam_ext) -%>
 require_once( "extensions/<%= spam_ext %>.php" );
