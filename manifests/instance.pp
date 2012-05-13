@@ -44,6 +44,7 @@ define mediawiki::instance(
   $file_extensions = 'absent',
   $extensions = 'absent',
   $language = 'de',
+  $spam_protection = false,
   $wiki_options = {},
   $documentroot_owner = root,
   $documentroot_group = apache,
@@ -100,6 +101,18 @@ define mediawiki::instance(
       }
     } else {
       mediawiki::file{"${real_path}/Wiki.png": src_path => $basedir, }
+    }
+
+    if ('Math/Math' in $extensions) or $spam_protection {
+      require mediawiki::math
+      file{
+        "${real_path}/images/tmp":
+          ensure => directory,
+          owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_write_mode;
+        "${real_path}/images/tmp/latex.fmt":
+          source => '/root/.texmf-var/web2c/latex.fmt',
+          owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+      }
     }
 
     case $config {

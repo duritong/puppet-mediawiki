@@ -17,6 +17,7 @@ $wgScript           = "$wgScriptPath/index.php";
 $wgRedirectScript   = "$wgScriptPath/redirect.php";
 $wgStylePath        = "$wgScriptPath/skins";
 $wgUploadPath       = "$wgScriptPath/images";
+$wgUploadDirectory  = "$wgScriptPath/images";
 
 ## If using PHP as a CGI module, use the ugly URLs
 $wgArticlePath      = "$wgScript/$1";
@@ -89,9 +90,9 @@ $wgHashedUploadDirectory = false;
 ## If you have the appropriate support software installed
 ## you can enable inline LaTeX equations:
 # $wgUseTeX         = true;
-$wgMathPath         = "{$wgUploadPath}/math";
-$wgMathDirectory    = "{$wgUploadDirectory}/math";
-$wgTmpDirectory     = "{$wgUploadDirectory}/tmp";
+$wgMathPath         = "$wgUploadPath/math";
+$wgMathDirectory    = "$wgUploadDirectory/math";
+$wgTmpDirectory     = "$wgUploadDirectory/tmp";
 
 $wgLocalInterwiki   = $wgSitename;
 
@@ -143,9 +144,16 @@ $wgMinimalPasswordLength = 8;
 
 # enable extensions
 require_once('extensions/ssl_login.php');
-<% unless extensions == 'absent' -%>
-<% extensions.to_a.each do |extension| -%>
+<% unless extensions == 'absent'
+      extensions.to_a.each do |extension| -%>
 require_once( "extensions/<%= extension %>.php" );
-<% end -%>
-<% end -%>
+    end -%>
+   end -%>
+<% if spam_protection -%>
+     [ 'Math/Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
+       unless extensions.to_a.include?(spam_ext) -%>
+require_once( "extensions/<%= spam_ext %>.php" );
+<%     end
+     end
+    end -%>
 ?>
