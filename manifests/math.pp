@@ -9,10 +9,10 @@ class mediawiki::math {
     'generate_texvc':
       command => 'make',
       cwd => '/var/www/mediawiki/extensions/Math/math/',
-      generates => '/var/www/mediawiki/extensions/Math/math/texvc',
+      creates => '/var/www/mediawiki/extensions/Math/math/texvc',
       requires => Git::Clone['mediawiki'];
     'generalte_latex.fmt':
       command => '/var/www/mediawiki/extensions/Math/math/texvc /tmp /tmp "y=x+2"',
-      generates => '/root/.texmf-var/web2c/latex.fmt';
+      creates => '/root/.texmf-var/web2c/latex.fmt';
   }
 }
