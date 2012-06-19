@@ -82,10 +82,10 @@ define mediawiki::instance(
 
     mediawiki::file{
       [ "${real_path}/languages", "${real_path}/thumb.php", "${real_path}/img_auth.php",
-        "${real_path}/redirect.php", "${real_path}/trackback.php", "${real_path}/includes", "${real_path}/redirect.phtml",
+        "${real_path}/redirect.php", "${real_path}/includes", "${real_path}/redirect.phtml",
         "${real_path}/wiki.phtml", "${real_path}/index.php", "${real_path}/load.php",
         "${real_path}/resources", "${real_path}/skins", "${real_path}/extensions", "${real_path}/opensearch_desc.php",
-        "${real_path}/serialized" ]:
+        "${real_path}/serialized", "${real_path}/thumb_handler.php" ]:
         src_path => $basedir;
       "${real_path}/images/.htaccess":
         src_path => "$basedir/images";
