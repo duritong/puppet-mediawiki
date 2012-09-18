@@ -93,6 +93,7 @@ $wgHashedUploadDirectory = false;
 $wgMathPath         = "$wgUploadPath/math";
 $wgMathDirectory    = "$wgUploadDirectory/math";
 $wgTmpDirectory     = "$wgUploadDirectory/tmp";
+putenv("TMPDIR=$IP/images/temp");
 
 $wgLocalInterwiki   = $wgSitename;
 
