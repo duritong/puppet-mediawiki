@@ -159,7 +159,7 @@ define mediawiki::instance(
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
           exec{"install_mediawiki_${name}":
             command => "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass ${$real_db_pwd} --lang ${language} --pass ${admin_pass} --scriptpath / '${sitename}' admin",
-            unless => "ruby -rrubygems -rmysql -e 'exit Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\").query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0'",
+            unless => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
             require => File["${real_path}/LocalSettings.php"];
           }
         }
