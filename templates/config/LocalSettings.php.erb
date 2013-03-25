@@ -160,7 +160,7 @@ require_once('extensions/<%= spam_ext %>.php');
 <%  end
   end
 end -%>
-<% if exensions.include?('WikiEditor/WikiEditor') -%>
+<% if extensions.include?('WikiEditor/WikiEditor') -%>
 
 # Enables use of WikiEditor by default but still allow users to disable it in preferences
 $wgDefaultUserOptions['usebetatoolbar'] = 1;
@@ -172,7 +172,7 @@ $wgDefaultUserOptions['wikieditor-preview'] = 1;
 # Displays the Publish and Cancel buttons on the top right side
 $wgDefaultUserOptions['wikieditor-publish'] = 1;
 <% end -%>
-<% if exensions.include?('WYSIWYG/WYSIWYG') -%>
+<% if extensions.include?('WYSIWYG/WYSIWYG') -%>
 
 # WYSIWYG/WYSIWYG.php
 $wgGroupPermissions['*']['wysiwyg']=true;
