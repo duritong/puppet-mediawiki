@@ -21,8 +21,8 @@
 #
 # extenstions: extensions to enable for the wiki
 #   - default: none
-#   - have to be a : separated list of extensions relativ to the extensions path, like:
-#       "ext_foobar1:ext_foobar2:foobar3/ext"
+#   - has to be an array of extesions relative to the extensions/ directory:
+#       [ 'ext_foobar1', 'ext_foobar2', 'foobar3/ext' ]
 #
 # language: language of the wiki
 #   - default: de

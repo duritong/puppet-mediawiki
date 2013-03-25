@@ -149,15 +149,19 @@ require_once('extensions/ssl_login.php');
 <%
 unless extensions == 'absent'
   extensions.each do |extension| -%>
-require_once( 'extensions/<%= extension %>.php' );
+require_once('extensions/<%= extension %>.php');
 <%
   end
 end
 if spam_protection
   [ 'Math/Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
     unless extensions.include?(spam_ext) -%>
-require_once( 'extensions/<%= spam_ext %>.php' );
+require_once('extensions/<%= spam_ext %>.php');
 <%  end
   end
 end -%>
+
+<% if real_wiki_options.key?('plain_options') -%>
+<%= real_wiki_options['plain_options'] %>
+<% end -%>
 ?>
