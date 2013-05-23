@@ -143,6 +143,10 @@ $wgFileCacheDirectory = "$IP/cache";
 $wgShowIPinHeader = false;
 
 $wgMinimalPasswordLength = 8;
+<% if real_wiki_options['read_only'] -%>
+
+$wgReadOnly = '<%= real_wiki_options['read_only'] %>';
+<% end -%>
 
 # enable extensions
 require_once('extensions/ssl_login.php');
