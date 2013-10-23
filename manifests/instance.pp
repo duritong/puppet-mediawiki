@@ -68,20 +68,21 @@ define mediawiki::instance(
       ensure => absent,
     }
   } else {
-    file{$real_path:
-      ensure  => directory,
-      recurse => true,
-      purge   => true,
-      force   => true,
-      owner   => $documentroot_owner,
-      group   => $documentroot_group,
-      mode    => $documentroot_mode;
-    }
-    file{ [ "${real_path}/images", "${real_path}/cache" ]:
-      ensure  => directory,
-      owner   => $documentroot_owner,
-      group   => $documentroot_group,
-      mode    => $documentroot_write_mode;
+    file{
+      $real_path:
+        ensure        => directory,
+        recurse       => true,
+        recurselimit  => 1,
+        purge         => true,
+        force         => true,
+        owner         => $documentroot_owner,
+        group         => $documentroot_group,
+        mode          => $documentroot_mode;
+      [ "${real_path}/images", "${real_path}/cache" ]:
+        ensure        => directory,
+        owner         => $documentroot_owner,
+        group         => $documentroot_group,
+        mode          => $documentroot_write_mode;
     }
 
     mediawiki::file{
