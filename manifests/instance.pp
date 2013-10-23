@@ -27,29 +27,29 @@
 # language: language of the wiki
 #   - default: de
 define mediawiki::instance(
-  $ensure = present,
-  $path = 'absent',
-  $image = 'absent',
-  $config = 'unmanaged',
-  $db_server = 'unmanaged',
-  $db_name = 'unmanaged',
-  $db_user = 'db_name',
-  $db_pwd = 'unmanaged',
-  $contact = 'unmanaged',
-  $sitename = 'unmanaged',
-  $secret_key = 'unmanaged',
-  $autoinstall = true,
-  $squid_servers = 'absent',
-  $hashed_upload_dir = true,
-  $file_extensions = 'absent',
-  $extensions = 'absent',
-  $language = 'de',
-  $spam_protection = false,
-  $wiki_options = {},
-  $documentroot_owner = root,
-  $documentroot_group = apache,
-  $documentroot_mode = 0640,
-  $documentroot_write_mode = 0660
+  $ensure                   = present,
+  $path                     = 'absent',
+  $image                    = 'absent',
+  $config                   = 'unmanaged',
+  $db_server                = 'unmanaged',
+  $db_name                  = 'unmanaged',
+  $db_user                  = 'db_name',
+  $db_pwd                   = 'unmanaged',
+  $contact                  = 'unmanaged',
+  $sitename                 = 'unmanaged',
+  $secret_key               = 'unmanaged',
+  $autoinstall              = true,
+  $squid_servers            = 'absent',
+  $hashed_upload_dir        = true,
+  $file_extensions          = 'absent',
+  $extensions               = 'absent',
+  $language                 = 'de',
+  $spam_protection          = false,
+  $wiki_options             = {},
+  $documentroot_owner       = root,
+  $documentroot_group       = apache,
+  $documentroot_mode        = 0640,
+  $documentroot_write_mode  = 0660
 ){
   include ::mediawiki
 
@@ -69,15 +69,19 @@ define mediawiki::instance(
     }
   } else {
     file{$real_path:
-      ensure => directory,
+      ensure  => directory,
       recurse => true,
-      purge => true,
-      force => true,
-      owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+      purge   => true,
+      force   => true,
+      owner   => $documentroot_owner,
+      group   => $documentroot_group,
+      mode    => $documentroot_mode;
     }
     file{ [ "${real_path}/images", "${real_path}/cache" ]:
-      ensure => directory,
-      owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_write_mode;
+      ensure  => directory,
+      owner   => $documentroot_owner,
+      group   => $documentroot_group,
+      mode    => $documentroot_write_mode;
     }
 
     mediawiki::file{
@@ -88,16 +92,18 @@ define mediawiki::instance(
         "${real_path}/serialized", "${real_path}/thumb_handler.php" ]:
         src_path => $basedir;
       "${real_path}/images/.htaccess":
-        src_path => "$basedir/images";
+        src_path => "${basedir}/images";
       "${real_path}/cache/.htaccess":
-        src_path => "$basedir/cache";
+        src_path => "${basedir}/cache";
     }
 
     if ($image != 'absent') {
-      mediawiki::config{"${image}":
-        mediawiki_name => $name,
-        dst_path => $real_path,
-        owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+      mediawiki::config{$image:
+        mediawiki_name  => $name,
+        dst_path        => $real_path,
+        owner           => $documentroot_owner,
+        group           => $documentroot_group,
+        mode            => $documentroot_mode;
       }
     } else {
       mediawiki::file{"${real_path}/Wiki.png": src_path => $basedir, }
@@ -107,11 +113,15 @@ define mediawiki::instance(
       require mediawiki::math
       file{
         "${real_path}/images/tmp":
-          ensure => directory,
-          owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_write_mode;
+          ensure  => directory,
+          owner   => $documentroot_owner,
+          group   => $documentroot_group,
+          mode    => $documentroot_write_mode;
         "${real_path}/images/tmp/latex.fmt":
-          source => '/root/.texmf-var/web2c/latex.fmt',
-          owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+          source  => '/root/.texmf-var/web2c/latex.fmt',
+          owner   => $documentroot_owner,
+          group   => $documentroot_group,
+          mode    => $documentroot_mode;
       }
     }
 
@@ -119,9 +129,11 @@ define mediawiki::instance(
       'file': {
         mediawiki::config{
           'LocalSettings.php':
-            mediawiki_name => $name,
-            dst_path => $real_path,
-            owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+            mediawiki_name  => $name,
+            dst_path        => $real_path,
+            owner           => $documentroot_owner,
+            group           => $documentroot_group,
+            mode            => $documentroot_mode;
           }
       }
       'template': {
@@ -143,9 +155,9 @@ define mediawiki::instance(
         }
 
         $std_wiki_options = {
-          anyone_can_edit => false,
-          anyone_can_register => true,
-          email_authentication => false,
+          anyone_can_edit       => false,
+          anyone_can_register   => true,
+          email_authentication  => false,
         }
         $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
@@ -153,13 +165,15 @@ define mediawiki::instance(
           "${real_path}/LocalSettings.php":
             content => template('mediawiki/config/LocalSettings.php.erb'),
             require => Mediawiki::File["${real_path}/index.php"],
-            owner => $documentroot_owner, group => $documentroot_group, mode => $documentroot_mode;
+            owner   => $documentroot_owner,
+            group   => $documentroot_group,
+            mode    => $documentroot_mode;
         }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
           exec{"install_mediawiki_${name}":
             command => "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin",
-            unless => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
+            unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
             require => File["${real_path}/LocalSettings.php"];
           }
         }
