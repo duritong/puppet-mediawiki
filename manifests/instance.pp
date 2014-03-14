@@ -112,6 +112,10 @@ define mediawiki::instance(
 
     if ('Math/Math' in $extensions) or $spam_protection {
       require mediawiki::math
+      $latex_fmt_source = $::operatingsystemmajrelease ? {
+        5 => '/root/.texmf-var/web2c/latex.fmt',
+        6 => '/var/lib/texmf/web2c/pdftex/latex.fmt'
+      }
       file{
         "${real_path}/images/tmp":
           ensure  => directory,
@@ -119,7 +123,7 @@ define mediawiki::instance(
           group   => $documentroot_group,
           mode    => $documentroot_write_mode;
         "${real_path}/images/tmp/latex.fmt":
-          source  => '/root/.texmf-var/web2c/latex.fmt',
+          source  => $latex_fmt_source,
           owner   => $documentroot_owner,
           group   => $documentroot_group,
           mode    => $documentroot_mode;
