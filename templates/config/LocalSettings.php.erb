@@ -9,6 +9,8 @@ ini_set( "include_path", ".:$IP:$IP/includes:$IP/languages" );
 require_once( "includes/DefaultSettings.php" );
 
 $wgSitename         = "<%= @sitename %>";
+$wgServer           = "//<%= @server %>";
+$wgCanonicalServer  = "<%= @canonical_server %>";
 
 ## * like $wgScriptPath, you must also localize everything that
 global $wgScriptPath;

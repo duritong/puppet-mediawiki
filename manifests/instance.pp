@@ -38,6 +38,8 @@ define mediawiki::instance(
   $contact                  = 'unmanaged',
   $sitename                 = 'unmanaged',
   $secret_key               = 'unmanaged',
+  $server                   = $name,
+  $ssl_mode                 = false,
   $autoinstall              = true,
   $squid_servers            = 'absent',
   $hashed_upload_dir        = true,
@@ -68,6 +70,11 @@ define mediawiki::instance(
       ensure => absent,
     }
   } else {
+    $canonical_server = $ssl_mode ? {
+      'force' => "https://${server}",
+      'only'  => "https://${server}",
+      default => "http://${server}"
+    }
     file{
       $real_path:
         ensure        => directory,
