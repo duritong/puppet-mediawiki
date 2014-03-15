@@ -4,11 +4,11 @@
 # If you make manual changes, please keep track in case you need to
 # recreate them later.
 
-$IP = "<%= real_path %>";
+$IP = "<%= @real_path %>";
 ini_set( "include_path", ".:$IP:$IP/includes:$IP/languages" );
 require_once( "includes/DefaultSettings.php" );
 
-$wgSitename         = "<%= sitename %>";
+$wgSitename         = "<%= @sitename %>";
 
 ## * like $wgScriptPath, you must also localize everything that
 global $wgScriptPath;
@@ -24,16 +24,16 @@ $wgArticlePath      = "$wgScript/$1";
 # $wgArticlePath      = "$wgScript?title=$1";
 
 #$wgStyleDirectory   = "$IP/stylesheets";
-<% unless image.to_s == 'absent' -%>
-$wgLogo             = "/<%= image %>";
+<% unless @image.to_s == 'absent' -%>
+$wgLogo             = "/<%= @image %>";
 <% else -%>
 $wgLogo             = "/Wiki.png";
 <% end -%>
 
 $wgEnableEmail = true;
 $wgEnableUserEmail = false;
-$wgEmergencyContact = "<%= contact %>";
-$wgPasswordSender      = "<%= contact %>";
+$wgEmergencyContact = "<%= @contact %>";
+$wgPasswordSender      = "<%= @contact %>";
 
 ## For a detailed description of the following switches see
 ## http://meta.wikimedia.org/Enotif and http://meta.wikimedia.org/Eauthent
@@ -42,16 +42,16 @@ $wgPasswordSender      = "<%= contact %>";
 ## UPO means: this is also a user preference option
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
-$wgEmailAuthentication = <%= real_wiki_options['email_authentication'] %>;
-$wgEmailConfirmToEdit = <%= real_wiki_options['email_authentication'] %>;
+$wgEmailAuthentication = <%= @real_wiki_options['email_authentication'] %>;
+$wgEmailConfirmToEdit = <%= @real_wiki_options['email_authentication'] %>;
 
 
-$wgDBserver         = "<%= db_server %>";
-$wgDBname           = "<%= db_name %>";
-$wgDBuser           = "<%= real_db_user %>";
-$wgDBpassword       = "<%= real_db_pwd %>";
-$wgDBadminuser      = "<%= real_db_user %>";
-$wgDBadminpassword  = "<%= real_db_pwd %>";
+$wgDBserver         = "<%= @db_server %>";
+$wgDBname           = "<%= @db_name %>";
+$wgDBuser           = "<%= @real_db_user %>";
+$wgDBpassword       = "<%= @real_db_pwd %>";
+$wgDBadminuser      = "<%= @real_db_user %>";
+$wgDBadminpassword  = "<%= @real_db_pwd %>";
 $wgDBprefix         = "";
 
 ## To allow SQL queries through the wiki's Special:Askaql page,
@@ -84,7 +84,7 @@ $wgUseImageResize       = true;
 ## images/temp, and make them all writable. Then uncomment
 ## this, if it's not already uncommented:
 #$wgHashedUploadDirectory = false;
-<% unless hashed_upload_dir -%>
+<% unless @hashed_upload_dir -%>
 $wgHashedUploadDirectory = false;
 <% end -%>
 
@@ -98,9 +98,9 @@ putenv("TMPDIR=$IP/images/temp");
 
 $wgLocalInterwiki   = $wgSitename;
 
-$wgLanguageCode = "<%= language %>";
+$wgLanguageCode = "<%= @language %>";
 
-$wgSecretKey = "<%= real_secret_key %>";
+$wgSecretKey = "<%= @real_secret_key %>";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
@@ -109,16 +109,16 @@ global $wgDefaultSkin;
 
 ## Specify who can edit: true means only logged in users may edit pages
 $wgWhitelistEdit = true;
-$wgGroupPermissions['*']['edit'] = <%= real_wiki_options['anyone_can_edit'] %>;
-$wgGroupPermissions['*']['createaccount'] = <%= real_wiki_options['anyone_can_register'] %>;
+$wgGroupPermissions['*']['edit'] = <%= @real_wiki_options['anyone_can_edit'] %>;
+$wgGroupPermissions['*']['createaccount'] = <%= @real_wiki_options['anyone_can_register'] %>;
 
 # Specify who may create new accounts: 0 means no, 1 means yes
 $wgWhitelistAccount = array ( 'user' => 0, 'sysop' => 1, 'developer' => 1 );
 
-<% if file_extensions.to_s == 'absent' -%>
+<% if @file_extensions.to_s == 'absent' -%>
 $wgFileExtensions = array( 'png', 'gif', 'jpg', 'jpeg', 'ogg', 'txt', 'pdf','patch','bz2', 'doc','zip', 'ods', 'odt', 'rtf' );
 <% else -%>
-$wgFileExtensions = array( '<%= file_extensions.join("', '") %>' );
+$wgFileExtensions = array( '<%= @file_extensions.join("', '") %>' );
 <% end -%>
 
 ## For attaching licensing metadata to pages, and displaying an
@@ -132,10 +132,10 @@ $wgRightsIcon = "${wgStylePath}/common/images/gnu-fdl.png";
 # $wgRightsCode = "gfdl"; # Not yet used
 
 $wgDiff3 = "";
-<% unless squid_servers.to_s == 'absent' -%>
+<% unless @squid_servers.to_s == 'absent' -%>
 
 $wgUseSquid = true;
-$wgSquidServers = array(<%= "'#{squid_servers.join("\', \'")}'" %>);
+$wgSquidServers = array(<%= "'#{@squid_servers.join("\', \'")}'" %>);
 <% end -%>
 
 $wgUseFileCache = true; /* default: false */
@@ -143,28 +143,28 @@ $wgFileCacheDirectory = "$IP/cache";
 $wgShowIPinHeader = false;
 
 $wgMinimalPasswordLength = 8;
-<% if real_wiki_options['read_only'] -%>
+<% if @real_wiki_options['read_only'] -%>
 
-$wgReadOnly = '<%= real_wiki_options['read_only'] %>';
+$wgReadOnly = '<%= @real_wiki_options['read_only'] %>';
 <% end -%>
 
 # enable extensions
 require_once('extensions/ssl_login.php');
 <%
-unless extensions == 'absent'
-  extensions.each do |extension| -%>
+unless @extensions == 'absent'
+  @extensions.each do |extension| -%>
 require_once('extensions/<%= extension %>.php');
 <%
   end
 end
-if spam_protection
+if @spam_protection
   [ 'Math/Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
-    unless extensions.include?(spam_ext) -%>
+    unless @extensions.include?(spam_ext) -%>
 require_once('extensions/<%= spam_ext %>.php');
 <%  end
   end
 end -%>
-<% if extensions.include?('WikiEditor/WikiEditor') -%>
+<% if @extensions.include?('WikiEditor/WikiEditor') -%>
 
 # Enables use of WikiEditor by default but still allow users to disable it in preferences
 $wgDefaultUserOptions['usebetatoolbar'] = 1;
@@ -176,13 +176,13 @@ $wgDefaultUserOptions['wikieditor-preview'] = 1;
 # Displays the Publish and Cancel buttons on the top right side
 $wgDefaultUserOptions['wikieditor-publish'] = 1;
 <% end -%>
-<% if extensions.include?('WYSIWYG/WYSIWYG') -%>
+<% if @extensions.include?('WYSIWYG/WYSIWYG') -%>
 
 # WYSIWYG/WYSIWYG.php
 $wgGroupPermissions['*']['wysiwyg']=true;
 <% end -%>
-<% if real_wiki_options.key?('plain_options') -%>
+<% if @real_wiki_options.key?('plain_options') -%>
 
-<%= real_wiki_options['plain_options'] %>
+<%= @real_wiki_options['plain_options'] %>
 <% end -%>
 ?>
