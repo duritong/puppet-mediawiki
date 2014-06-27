@@ -1,10 +1,7 @@
 #!/usr/bin/ruby -w
 
-require 'rubygems'
-require 'highline/import'
 require 'ftools'
 require 'fileutils'
-require 'mysql'
 
 load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
 
@@ -33,21 +30,9 @@ def update_php(dir)
   Dir.chdir(old_dir)
 end
 
-def dbupdate(dir, dbh)
+def dbupdate(dir)
   dbname, dbuser = get_db_info(dir)
   update_php(dir)  
-end
-
-def connect_db()
-  user = ask("Enter db user name with global grant privileges: ")
-  passwd = ask("Enter your password:  ") { |q| q.echo = "x" }
-  dbh = Mysql.real_connect(DB_HOST, user, passwd)
-  puts "Server version: " + dbh.get_server_info
-  return dbh
-end
-
-def close_db(dbh)
-  dbh.close if dbh
 end
 
 def get_wikis()
@@ -55,11 +40,9 @@ def get_wikis()
 end
 
 begin
-  dbh = connect_db()  
-
   get_wikis().each do |dir|
     puts "processing wiki: #{dir}"
-    dbupdate(dir,dbh)
+    dbupdate(dir)
   end
 
   puts "done."
@@ -67,6 +50,4 @@ rescue Mysql::Error => e
   puts "Error code: #{e.errno}"
   puts "Error message: #{e.error}"
   puts "Error SQLSTATE: #{e.sqlstate}" if e.respond_to?("sqlstate")
-ensure
-  close_db(dbh)
 end
