@@ -5,49 +5,48 @@ require 'fileutils'
 
 load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
 
-def match_vardecl(txt, var)
-  m = txt.match(/\$#{var} *= *"(.*)"/)
-  return m ? m[1] : nil  
-end
-
-def get_db_info(dir)
-  txt = File.read(File.join(dir, 'LocalSettings.php'))
-
-  dbname, dbuser = nil, nil
-  dbname ||= match_vardecl(txt, "wgDBname")
-  dbuser ||= match_vardecl(txt, "wgDBuser")
-
-  return [dbname, dbuser]
-end
-
 def update_php(dir)
   old_dir = Dir.getwd
   Dir.chdir(dir)
-  File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
-  result = `php maintenance/update.php --quick --conf #{dir}/LocalSettings.php`.split("\n")
-  result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} unless result.empty?
-  FileUtils.remove_entry_secure("#{dir}/maintenance", true)
+  stat = File.stat(dir)
+  sudo(stat.uid, stat.gid) do
+    File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
+    [ "php maintenance/update.php --quick --conf #{dir}/LocalSettings.php",
+      "find #{File.join(dir,cache)} -name '*.html' -type f -delete" ].each do |cmd|
+      result = `#{cmd}`.split("\n")
+      result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} unless result.empty?
+    end
+    FileUtils.remove_entry_secure("#{dir}/maintenance", true)
+  end
   Dir.chdir(old_dir)
 end
 
-def dbupdate(dir)
-  dbname, dbuser = get_db_info(dir)
-  update_php(dir)  
+def wikis
+  `ls #{VHOSTS_BASE}/*/www/LocalSettings.php`.collect{|f| File.dirname(f)}
 end
 
-def get_wikis()
-  `ls #{VHOSTS_BASE}/*/www/LocalSettings.php`.collect{|f| File.dirname(f)} 
-end
-
-begin
-  get_wikis().each do |dir|
-    puts "processing wiki: #{dir}"
-    dbupdate(dir)
+def sudo(uid,gid,&blk)
+  # fork off shell command to irrevocably drop all root privileges
+  pid = fork do
+    Process::Sys.setregid(gid,gid)
+    security_fail('could not drp privileges') unless Process::Sys.getgid == gid
+    security_fail('could not drop privileges') unless Process::Sys.getegid == gid
+    Process::Sys.setreuid(uid,uid)
+    security_fail('could not drop privileges') unless Process::Sys.getuid == uid
+    security_fail('could not drop privileges') unless Process::Sys.geteuid == uid
+    yield blk
   end
-
-  puts "done."
-rescue Mysql::Error => e
-  puts "Error code: #{e.errno}"
-  puts "Error message: #{e.error}"
-  puts "Error SQLSTATE: #{e.sqlstate}" if e.respond_to?("sqlstate")
+  Process.wait pid
 end
+
+def security_fail(msg)
+  puts "Error: #{msg}"
+  puts "Aborting..."
+  exit 1
+end
+
+wikis.each do |dir|
+  puts "processing wiki: #{dir}"
+  update_php(dir)
+end
+puts "done."
