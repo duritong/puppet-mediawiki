@@ -10,15 +10,26 @@ def update_php(dir)
   Dir.chdir(dir)
   stat = File.stat(dir)
   sudo(stat.uid, stat.gid) do
-    File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance")
+    File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance") unless File.exists?("#{dir}/maintenance")
     [ "php maintenance/update.php --quick --conf #{dir}/LocalSettings.php",
-      "find #{File.join(dir,cache)} -name '*.html' -type f -delete" ].each do |cmd|
-      result = `#{cmd}`.split("\n")
-      result[(result.length-3)..(result.length-1)].each{|l| puts "> #{l}"} unless result.empty?
+      "find #{File.join(dir,'cache')} -name '*.html' -type f -delete" ].each do |cmd|
+      run(cmd)
     end
     FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   end
   Dir.chdir(old_dir)
+end
+
+def run(cmd)
+  result = `#{cmd}`.split("\n")
+  if $?.to_i > 0
+    output = result
+  elsif !result.empty? && result.size > 2
+    output = result[(result.length-3)..(result.length-1)]
+  else
+    output = result
+  end
+  output.each{|l| puts "> #{l}"}
 end
 
 def wikis
@@ -45,8 +56,15 @@ def security_fail(msg)
   exit 1
 end
 
+puts "updating git..."
+Dir.chdir(MEDIAWIKI_SOURCE)
+run('git pull')
+puts "done"
+
 wikis.each do |dir|
   puts "processing wiki: #{dir}"
   update_php(dir)
+  puts "done."
 end
-puts "done."
+puts "All done!"
+
