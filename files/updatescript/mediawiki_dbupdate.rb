@@ -52,19 +52,23 @@ end
 
 def security_fail(msg)
   puts "Error: #{msg}"
-  puts "Aborting..."
+  puts 'Aborting...'
   exit 1
 end
 
-puts "updating git..."
-Dir.chdir(MEDIAWIKI_SOURCE)
-run('git pull')
-puts "done"
+if File.directory?(File.join(MEDIAWIKI_SOURCE,'.git'))
+  puts 'updating git...'
+  old_dir = Dir.getwd
+  Dir.chdir(MEDIAWIKI_SOURCE)
+  run('git pull && git submodule update --init')
+  puts 'done'
+  Dir.chdir(old_dir)
+end
 
 wikis.each do |dir|
   puts "processing wiki: #{dir}"
   update_php(dir)
-  puts "done."
+  puts 'done.'
 end
-puts "All done!"
+puts 'All done!'
 
