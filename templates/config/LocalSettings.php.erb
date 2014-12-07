@@ -13,7 +13,6 @@ $wgServer           = "//<%= @server %>";
 $wgCanonicalServer  = "<%= @canonical_server %>";
 
 ## * like $wgScriptPath, you must also localize everything that
-global $wgScriptPath;
 $wgScriptPath       = '';
 $wgScript           = "$wgScriptPath/index.php";
 $wgRedirectScript   = "$wgScriptPath/redirect.php";
@@ -106,8 +105,11 @@ $wgSecretKey = "<%= @real_secret_key %>";
 
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
-global $wgDefaultSkin;
 # $wgDefaultSkin = 'monobook';
+require_once "$IP/skins/CologneBlue/CologneBlue.php";
+require_once "$IP/skins/Modern/Modern.php";
+require_once "$IP/skins/MonoBook/MonoBook.php";
+require_once "$IP/skins/Vector/Vector.php";
 
 ## Specify who can edit: true means only logged in users may edit pages
 $wgWhitelistEdit = true;
