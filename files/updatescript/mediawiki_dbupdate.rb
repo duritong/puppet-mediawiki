@@ -11,11 +11,13 @@ def update_php(dir)
   stat = File.stat(dir)
   sudo(stat.uid, stat.gid) do
     File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance") unless File.exists?("#{dir}/maintenance")
-    [ "php maintenance/update.php --quick --conf #{dir}/LocalSettings.php",
-      "find #{File.join(dir,'cache')} -name '*.html' -type f -delete" ].each do |cmd|
-      run(cmd)
-    end
+    run("php maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
     FileUtils.remove_entry_secure("#{dir}/maintenance", true)
+  end
+  # history folder is owned by the run user
+  stat = File.stat(File.join(dir,'cache','history'))
+  sudo(stat.uid, stat.gid) do
+    run("find #{File.join(dir,'cache')} -name '*.html' -type f -delete")
   end
   Dir.chdir(old_dir)
 end
