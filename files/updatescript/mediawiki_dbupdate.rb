@@ -15,9 +15,12 @@ def update_php(dir)
     FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   end
   # history folder is owned by the run user
-  stat = File.stat(File.join(dir,'cache','history'))
-  sudo(stat.uid, stat.gid) do
-    run("find #{File.join(dir,'cache')} -name '*.html' -type f -delete")
+  d = File.join(dir,'cache','history')
+  if File.directory?(d)
+    stat = File.stat(d)
+    sudo(stat.uid, stat.gid) do
+      run("find #{File.join(dir,'cache')} -name '*.html' -type f -delete")
+    end
   end
   Dir.chdir(old_dir)
 end
