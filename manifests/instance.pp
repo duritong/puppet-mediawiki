@@ -95,6 +95,7 @@ define mediawiki::instance(
     mediawiki::file{
       [
         "${real_path}/api.php",
+        "${real_path}/autoload.php",
         "${real_path}/extensions",
         "${real_path}/img_auth.php",
         "${real_path}/includes",
@@ -109,6 +110,7 @@ define mediawiki::instance(
         "${real_path}/skins",
         "${real_path}/thumb_handler.php",
         "${real_path}/thumb.php",
+        "${real_path}/vendor",
         "${real_path}/wiki.phtml",
       ]:
         src_path => $basedir;
