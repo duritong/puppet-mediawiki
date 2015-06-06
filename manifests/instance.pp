@@ -50,8 +50,8 @@ define mediawiki::instance(
   $wiki_options             = {},
   $documentroot_owner       = root,
   $documentroot_group       = apache,
-  $documentroot_mode        = 0640,
-  $documentroot_write_mode  = 0660
+  $documentroot_mode        = '0640',
+  $documentroot_write_mode  = '0660'
 ){
   include ::mediawiki
 
@@ -156,12 +156,12 @@ define mediawiki::instance(
       'file': {
         mediawiki::config{
           'LocalSettings.php':
-            mediawiki_name  => $name,
-            dst_path        => $real_path,
-            owner           => $documentroot_owner,
-            group           => $documentroot_group,
-            mode            => $documentroot_mode;
-          }
+            mediawiki_name => $name,
+            dst_path       => $real_path,
+            owner          => $documentroot_owner,
+            group          => $documentroot_group,
+            mode           => $documentroot_mode;
+        }
       }
       'template': {
         if ($db_server=='unmanaged') or ($db_name=='unmanaged') or ($db_user=='unmanaged') or ($db_pwd=='unmanaged') or ($contact=='unmanaged') or ($sitename=='unmanaged') or ($secret_key=='unmanaged'){
