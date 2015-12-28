@@ -38,7 +38,9 @@ def run(cmd)
 end
 
 def wikis
-  `ls #{VHOSTS_BASE}/*/www/LocalSettings.php`.collect{|f| File.dirname(f)}
+  `ls #{VHOSTS_BASE}/*/www/LocalSettings.php`.collect{|f|
+    File.dirname(f)
+  }.select{|f| File.symlink?(File.join(f,'index.php')) }
 end
 
 def sudo(uid,gid,&blk)
