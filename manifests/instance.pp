@@ -91,6 +91,11 @@ define mediawiki::instance(
         group         => $documentroot_group,
         mode          => $documentroot_write_mode;
     }
+    if str2bool($::selinux) {
+      File[$real_path, "${real_path}/images", "${real_path}/cache" ]{
+        seltype => 'httpd_sys_rw_content_t',
+      }
+    }
 
     mediawiki::file{
       [
@@ -135,8 +140,8 @@ define mediawiki::instance(
     if ('Math/Math' in $extensions) or $spam_protection {
       require mediawiki::math
       $latex_fmt_source = $::operatingsystemmajrelease ? {
-        5 => '/root/.texmf-var/web2c/latex.fmt',
-        6 => '/var/lib/texmf/web2c/pdftex/latex.fmt'
+        '5'     => '/root/.texmf-var/web2c/latex.fmt',
+        default => '/var/lib/texmf/web2c/pdftex/latex.fmt'
       }
       file{
         "${real_path}/images/tmp":
@@ -149,6 +154,11 @@ define mediawiki::instance(
           owner   => $documentroot_owner,
           group   => $documentroot_group,
           mode    => $documentroot_mode;
+      }
+      if str2bool($::selinux) {
+        File["${real_path}/images/tmp","${real_path}/images/tmp/latex.fmt"]{
+          seltype => 'httpd_sys_rw_content_t',
+        }
       }
     }
 
@@ -196,12 +206,20 @@ define mediawiki::instance(
             group   => $documentroot_group,
             mode    => $documentroot_mode;
         }
+        File["${real_path}/LocalSettings.php"]{
+          # it does not need to be writeable
+          seltype => 'httpd_sys_content_t',
+        }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
           exec{"install_mediawiki_${name}":
             command => "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin",
             unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
             require => File["${real_path}/LocalSettings.php"];
+          }
+          if $db_server in ['localhost','127.0.0.1','::1'] {
+            Mysql_database<| title == $db_name |>  -> Exec["install_mediawiki_${name}"]
+            Mysql_user<| title == $real_db_user |> -> Exec["install_mediawiki_${name}"]
           }
         }
       }

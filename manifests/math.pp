@@ -5,7 +5,7 @@ class mediawiki::math {
   require tetex::latex
   require tetex::ghostscript
 
-  if $::operatingsystemmajrelease < 6 {
+  if versioncmp($::operatingsystemmajrelease,'6') < 0 {
     require make
     exec{
       'generate_texvc':
