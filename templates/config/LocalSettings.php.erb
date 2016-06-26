@@ -145,6 +145,8 @@ $wgSquidServers = array(<%= "'#{@squid_servers.join("\', \'")}'" %>);
 $wgUseFileCache = true; /* default: false */
 $wgFileCacheDirectory = "$IP/cache";
 $wgShowIPinHeader = false;
+# same value as suhosin default
+$wgResourceLoaderMaxQueryLength = 512;
 
 $wgMinimalPasswordLength = 8;
 <% if @real_wiki_options['read_only'] -%>
