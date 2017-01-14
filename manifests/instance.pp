@@ -48,6 +48,7 @@ define mediawiki::instance(
   $language                 = 'de',
   $spam_protection          = false,
   $wiki_options             = {},
+  $php_installation         = 'scl56',
   $documentroot_owner       = root,
   $documentroot_group       = apache,
   $documentroot_mode        = '0640',
@@ -212,10 +213,27 @@ define mediawiki::instance(
         }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
+          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin",
+          if $php_installation =~ /^scl/ {
+            $inst = regsubst($php_installation,'^scl','php')
+            require "::php::scl::${inst}"
+            $php_basedir = getvar("php::scl::${inst}::basedir")
+            $php_install_cmd = "bash -c \"source ${php_basedir}/enable && ${install_cmd}\""
+            $php_update_cmd = "source ${php_basedir}/enable && php ${real_path}/maintenance/update.php --quick --conf ${real_path}/LocalSettings.php"
+          } else {
+            $php_install_cmd = $install_command
+            $php_update_cmd = "php ${real_path}/maintenance/update.php --quick --conf ${real_path}/LocalSettings.php"
+          }
+
           exec{"install_mediawiki_${name}":
-            command => "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin",
+            command => $php_install_cmd,
             unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
             require => File["${real_path}/LocalSettings.php"];
+          } -> file{"${real_path}/.php_update_command":
+            content => $php_update_cmd,
+            owner   => root,
+            group   => 0,
+            mode    => '0644';
           }
           if $db_server in ['localhost','127.0.0.1','::1'] {
             Mysql_database<| title == $db_name |>  -> Exec["install_mediawiki_${name}"]

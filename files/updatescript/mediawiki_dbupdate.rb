@@ -11,7 +11,12 @@ def update_php(dir)
   stat = File.stat(dir)
   sudo(stat.uid, stat.gid) do
     File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance") unless File.exists?("#{dir}/maintenance")
-    run("php maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
+    # make sure we do not have a tampered update_command before running it
+    if File.exists?(update_cmd_file = "#{dir}/.php_update_command") && ((s=File.stat(update_cmd_file)).uid == 0) && sprintf("%o",s.mode) == "100644"
+      run(File.read(update_cmd_file))
+    else
+      run("php #{dir}/maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
+    end
     FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   end
   # history folder is owned by the run user
