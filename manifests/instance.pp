@@ -213,12 +213,12 @@ define mediawiki::instance(
         }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
-          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin",
+          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
           if $php_installation =~ /^scl/ {
             $inst = regsubst($php_installation,'^scl','php')
             require "::php::scl::${inst}"
             $php_basedir = getvar("php::scl::${inst}::basedir")
-            $php_install_cmd = "bash -c \"source ${php_basedir}/enable && ${install_cmd}\""
+            $php_install_cmd = "bash -c \"source ${php_basedir}/enable && ${install_command}\""
             $php_update_cmd = "source ${php_basedir}/enable && php ${real_path}/maintenance/update.php --quick --conf ${real_path}/LocalSettings.php"
           } else {
             $php_install_cmd = $install_command
