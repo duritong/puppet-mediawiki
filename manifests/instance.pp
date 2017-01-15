@@ -28,7 +28,6 @@
 #   - default: de
 define mediawiki::instance(
   $ensure                   = present,
-  $path                     = 'absent',
   $image                    = 'absent',
   $config                   = 'unmanaged',
   $db_server                = 'unmanaged',
@@ -61,13 +60,10 @@ define mediawiki::instance(
     default: { $basedir = '/usr/share/mediawiki' }
   }
 
-  case $path {
-    'absent': { $real_path = "/var/www/vhosts/${name}/www" }
-    default: { $real_path = $path }
-  }
+  $path = "/var/www/vhosts/${name}/www"
 
   if ($ensure == 'absent') {
-    file{$real_path:
+    file{$path:
       ensure => absent,
     }
   } else {
@@ -77,7 +73,7 @@ define mediawiki::instance(
       default => "http://${server}"
     }
     file{
-      $real_path:
+      $path:
         ensure        => directory,
         recurse       => true,
         recurselimit  => 1,
@@ -86,56 +82,56 @@ define mediawiki::instance(
         owner         => $documentroot_owner,
         group         => $documentroot_group,
         mode          => $documentroot_mode;
-      [ "${real_path}/images", "${real_path}/cache" ]:
+      [ "${path}/images", "${path}/cache" ]:
         ensure        => directory,
         owner         => $documentroot_owner,
         group         => $documentroot_group,
         mode          => $documentroot_write_mode;
     }
     if str2bool($::selinux) {
-      File[$real_path, "${real_path}/images", "${real_path}/cache" ]{
+      File[$path, "${path}/images", "${path}/cache" ]{
         seltype => 'httpd_sys_rw_content_t',
       }
     }
 
     mediawiki::file{
       [
-        "${real_path}/api.php",
-        "${real_path}/autoload.php",
-        "${real_path}/extensions",
-        "${real_path}/img_auth.php",
-        "${real_path}/includes",
-        "${real_path}/index.php",
-        "${real_path}/languages",
-        "${real_path}/load.php",
-        "${real_path}/mw-config",
-        "${real_path}/opensearch_desc.php",
-        "${real_path}/profileinfo.php",
-        "${real_path}/resources",
-        "${real_path}/serialized",
-        "${real_path}/skins",
-        "${real_path}/thumb_handler.php",
-        "${real_path}/thumb.php",
-        "${real_path}/vendor",
-        "${real_path}/wiki.phtml",
+        "${path}/api.php",
+        "${path}/autoload.php",
+        "${path}/extensions",
+        "${path}/img_auth.php",
+        "${path}/includes",
+        "${path}/index.php",
+        "${path}/languages",
+        "${path}/load.php",
+        "${path}/mw-config",
+        "${path}/opensearch_desc.php",
+        "${path}/profileinfo.php",
+        "${path}/resources",
+        "${path}/serialized",
+        "${path}/skins",
+        "${path}/thumb_handler.php",
+        "${path}/thumb.php",
+        "${path}/vendor",
+        "${path}/wiki.phtml",
       ]:
         src_path => $basedir;
-      "${real_path}/images/.htaccess":
+      "${path}/images/.htaccess":
         src_path => "${basedir}/images";
-      "${real_path}/cache/.htaccess":
+      "${path}/cache/.htaccess":
         src_path => "${basedir}/cache";
     }
 
     if ($image != 'absent') {
       mediawiki::config{$image:
         mediawiki_name  => $name,
-        dst_path        => $real_path,
+        dst_path        => $path,
         owner           => $documentroot_owner,
         group           => $documentroot_group,
         mode            => $documentroot_mode;
       }
     } else {
-      mediawiki::file{"${real_path}/Wiki.png": src_path => $basedir, }
+      mediawiki::file{"${path}/Wiki.png": src_path => $basedir, }
     }
 
     if ('Math/Math' in $extensions) or $spam_protection {
@@ -145,19 +141,19 @@ define mediawiki::instance(
         default => '/var/lib/texmf/web2c/pdftex/latex.fmt'
       }
       file{
-        "${real_path}/images/tmp":
+        "${path}/images/tmp":
           ensure  => directory,
           owner   => $documentroot_owner,
           group   => $documentroot_group,
           mode    => $documentroot_write_mode;
-        "${real_path}/images/tmp/latex.fmt":
+        "${path}/images/tmp/latex.fmt":
           source  => $latex_fmt_source,
           owner   => $documentroot_owner,
           group   => $documentroot_group,
           mode    => $documentroot_mode;
       }
       if str2bool($::selinux) {
-        File["${real_path}/images/tmp","${real_path}/images/tmp/latex.fmt"]{
+        File["${path}/images/tmp","${path}/images/tmp/latex.fmt"]{
           seltype => 'httpd_sys_rw_content_t',
         }
       }
@@ -168,7 +164,7 @@ define mediawiki::instance(
         mediawiki::config{
           'LocalSettings.php':
             mediawiki_name => $name,
-            dst_path       => $real_path,
+            dst_path       => $path,
             owner          => $documentroot_owner,
             group          => $documentroot_group,
             mode           => $documentroot_mode;
@@ -200,36 +196,36 @@ define mediawiki::instance(
         $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
         file{
-          "${real_path}/LocalSettings.php":
+          "${path}/LocalSettings.php":
             content => template('mediawiki/config/LocalSettings.php.erb'),
-            require => Mediawiki::File["${real_path}/index.php"],
+            require => Mediawiki::File["${path}/index.php"],
             owner   => $documentroot_owner,
             group   => $documentroot_group,
             mode    => $documentroot_mode;
         }
-        File["${real_path}/LocalSettings.php"]{
+        File["${path}/LocalSettings.php"]{
           # it does not need to be writeable
           seltype => 'httpd_sys_content_t',
         }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
-          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${real_path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
           if $php_installation =~ /^scl/ {
             $inst = regsubst($php_installation,'^scl','php')
             require "::php::scl::${inst}"
             $php_basedir = getvar("php::scl::${inst}::basedir")
             $php_install_cmd = "bash -c \"source ${php_basedir}/enable && ${install_command}\""
-            $php_update_cmd = "source ${php_basedir}/enable && php ${real_path}/maintenance/update.php --quick --conf ${real_path}/LocalSettings.php"
+            $php_update_cmd = "source ${php_basedir}/enable && php ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
           } else {
             $php_install_cmd = $install_command
-            $php_update_cmd = "php ${real_path}/maintenance/update.php --quick --conf ${real_path}/LocalSettings.php"
+            $php_update_cmd = "php ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
           }
 
           exec{"install_mediawiki_${name}":
             command => $php_install_cmd,
             unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
-            require => File["${real_path}/LocalSettings.php"];
-          } -> file{"${real_path}/.php_update_command":
+            require => File["${path}/LocalSettings.php"];
+          } -> file{"/var/www/vhosts/${name}/data/php_update_command":
             content => $php_update_cmd,
             owner   => root,
             group   => 0,
