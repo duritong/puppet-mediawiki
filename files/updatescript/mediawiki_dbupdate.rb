@@ -42,7 +42,7 @@ def run(cmd)
 end
 
 def wikis
-  `ls #{VHOSTS_BASE}/*/www/LocalSettings.php`.collect{|f|
+  `ls -1 #{VHOSTS_BASE}/*/www/LocalSettings.php`.split("\n").collect{|f|
     File.dirname(f)
   }.select{|f| File.symlink?(File.join(f,'index.php')) }
 end
