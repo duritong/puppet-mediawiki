@@ -1,6 +1,5 @@
 #!/usr/bin/ruby -w
 
-require 'ftools'
 require 'fileutils'
 
 load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
