@@ -166,7 +166,7 @@ end
 if @spam_protection
   [ 'Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
     unless @extensions.include?(spam_ext) -%>
-wfLoadExtension( '<%= spam_ext %>');
+wfLoadExtension('<%= spam_ext %>');
 <%  end
   end
 end -%>
