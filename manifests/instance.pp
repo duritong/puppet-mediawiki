@@ -113,7 +113,7 @@ define mediawiki::instance(
         "${path}/thumb_handler.php",
         "${path}/thumb.php",
         "${path}/vendor",
-        "${path}/wiki.phtml",
+        "${path}/vendor",
       ]:
         src_path => $basedir;
       "${path}/images/.htaccess":
