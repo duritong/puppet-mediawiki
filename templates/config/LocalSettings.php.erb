@@ -159,18 +159,18 @@ require_once('extensions/ssl_login.php');
 <%
 unless @extensions == 'absent'
   @extensions.each do |extension| -%>
-require_once('extensions/<%= extension %>.php');
+wfLoadExtension('<%= extension %>');
 <%
   end
 end
 if @spam_protection
-  [ 'Math/Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
+  [ 'Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
     unless @extensions.include?(spam_ext) -%>
-require_once('extensions/<%= spam_ext %>.php');
+wfLoadExtension( '<%= spam_ext %>');
 <%  end
   end
 end -%>
-<% if @extensions.include?('WikiEditor/WikiEditor') -%>
+<% if @extensions.include?('WikiEditor') -%>
 
 # Enables use of WikiEditor by default but still allow users to disable it in preferences
 $wgDefaultUserOptions['usebetatoolbar'] = 1;
@@ -182,7 +182,7 @@ $wgDefaultUserOptions['wikieditor-preview'] = 1;
 # Displays the Publish and Cancel buttons on the top right side
 $wgDefaultUserOptions['wikieditor-publish'] = 1;
 <% end -%>
-<% if @extensions.include?('WYSIWYG/WYSIWYG') -%>
+<% if @extensions.include?('WYSIWYG') -%>
 
 # WYSIWYG/WYSIWYG.php
 $wgGroupPermissions['*']['wysiwyg']=true;
