@@ -3,8 +3,8 @@ class mediawiki::base {
     ensure => present,
   }
 
-  include rubygems::highline
-  include ruby::mysql
+  require rubygems::highline
+  require ruby::mysql
 
   file{
     '/opt/bin/mediawiki_dbupdate.config.rb':
