@@ -154,8 +154,11 @@ $wgMinimalPasswordLength = 8;
 $wgReadOnly = '<%= @real_wiki_options['read_only'] %>';
 <% end -%>
 
+$wgSecureLogin = true;
+
 # enable extensions
-require_once('extensions/ssl_login.php');
+wfLoadExtension( 'MobileFrontend' );
+$wgMFAutodetectMobileView = true;
 <%
 unless @extensions == 'absent'
   @extensions.each do |extension| -%>
