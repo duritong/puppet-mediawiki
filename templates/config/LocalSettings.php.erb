@@ -31,8 +31,8 @@ $wgLogo             = "/<%= @image %>";
 $wgLogo             = "/Wiki.png";
 <% end -%>
 
-$wgEnableEmail = true;
-$wgEnableUserEmail = false;
+$wgEnableEmail = <%= @real_wiki_options['enable_email'].to_s || 'true' %>;
+$wgEnableUserEmail = <%= @real_wiki_options['enable_user_email'].to_s || 'false' %>;
 $wgEmergencyContact = "<%= @contact %>";
 $wgPasswordSender      = "<%= @contact %>";
 
@@ -43,8 +43,8 @@ $wgPasswordSender      = "<%= @contact %>";
 ## UPO means: this is also a user preference option
 $wgEnotifUserTalk = false; # UPO
 $wgEnotifWatchlist = false; # UPO
-$wgEmailAuthentication = <%= @real_wiki_options['email_authentication'] %>;
-$wgEmailConfirmToEdit = <%= @real_wiki_options['email_authentication'] %>;
+$wgEmailAuthentication = <%= @real_wiki_options['email_authentication'].to_s %>;
+$wgEmailConfirmToEdit = <%= @real_wiki_options['email_authentication'].to_s %>;
 
 
 $wgDBserver         = "<%= @db_server %>";
