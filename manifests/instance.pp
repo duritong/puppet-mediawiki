@@ -188,9 +188,11 @@ define mediawiki::instance(
         }
 
         $std_wiki_options = {
-          anyone_can_edit       => false,
-          anyone_can_register   => true,
-          email_authentication  => false,
+          anyone_can_edit      => false,
+          anyone_can_register  => true,
+          enable_email         => true,
+          enable_user_email    => false,
+          email_authentication => false,
         }
         $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
