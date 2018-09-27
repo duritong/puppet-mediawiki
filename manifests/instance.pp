@@ -74,19 +74,19 @@ define mediawiki::instance(
     }
     file{
       $path:
-        ensure        => directory,
-        recurse       => true,
-        recurselimit  => 1,
-        purge         => true,
-        force         => true,
-        owner         => $documentroot_owner,
-        group         => $documentroot_group,
-        mode          => $documentroot_mode;
+        ensure       => directory,
+        recurse      => true,
+        recurselimit => 1,
+        purge        => true,
+        force        => true,
+        owner        => $documentroot_owner,
+        group        => $documentroot_group,
+        mode         => $documentroot_mode;
       [ "${path}/images", "${path}/cache" ]:
-        ensure        => directory,
-        owner         => $documentroot_owner,
-        group         => $documentroot_group,
-        mode          => $documentroot_write_mode;
+        ensure => directory,
+        owner  => $documentroot_owner,
+        group  => $documentroot_group,
+        mode   => $documentroot_write_mode;
     }
     if str2bool($::selinux) {
       File[$path, "${path}/images", "${path}/cache" ]{
@@ -123,33 +123,33 @@ define mediawiki::instance(
 
     if ($image != 'absent') {
       mediawiki::config{$image:
-        mediawiki_name  => $name,
-        dst_path        => $path,
-        owner           => $documentroot_owner,
-        group           => $documentroot_group,
-        mode            => $documentroot_mode;
+        mediawiki_name => $name,
+        dst_path       => $path,
+        owner          => $documentroot_owner,
+        group          => $documentroot_group,
+        mode           => $documentroot_mode;
       }
     } else {
       mediawiki::file{"${path}/Wiki.png": src_path => $basedir, }
     }
 
     if ('Math/Math' in $extensions) or $spam_protection {
-      require mediawiki::math
+      require ::mediawiki::math
       $latex_fmt_source = $::operatingsystemmajrelease ? {
         '5'     => '/root/.texmf-var/web2c/latex.fmt',
         default => '/var/lib/texmf/web2c/pdftex/latex.fmt'
       }
       file{
         "${path}/images/tmp":
-          ensure  => directory,
-          owner   => $documentroot_owner,
-          group   => $documentroot_group,
-          mode    => $documentroot_write_mode;
+          ensure => directory,
+          owner  => $documentroot_owner,
+          group  => $documentroot_group,
+          mode   => $documentroot_write_mode;
         "${path}/images/tmp/latex.fmt":
-          source  => $latex_fmt_source,
-          owner   => $documentroot_owner,
-          group   => $documentroot_group,
-          mode    => $documentroot_mode;
+          source => $latex_fmt_source,
+          owner  => $documentroot_owner,
+          group  => $documentroot_group,
+          mode   => $documentroot_mode;
       }
       if str2bool($::selinux) {
         File["${path}/images/tmp","${path}/images/tmp/latex.fmt"]{
