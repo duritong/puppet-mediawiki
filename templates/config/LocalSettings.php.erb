@@ -31,8 +31,8 @@ $wgLogo             = "/<%= @image %>";
 $wgLogo             = "/Wiki.png";
 <% end -%>
 
-$wgEnableEmail = <%= @real_wiki_options['enable_email'].to_s || 'true' %>;
-$wgEnableUserEmail = <%= @real_wiki_options['enable_user_email'].to_s || 'false' %>;
+$wgEnableEmail = <%= (@real_wiki_options['enable_email'] || true).to_s %>;
+$wgEnableUserEmail = <%= (@real_wiki_options['enable_user_email'] || false).to_s %>;
 $wgEmergencyContact = "<%= @contact %>";
 $wgPasswordSender      = "<%= @contact %>";
 
