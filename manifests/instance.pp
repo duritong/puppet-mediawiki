@@ -47,7 +47,7 @@ define mediawiki::instance(
   $language                 = 'de',
   $spam_protection          = false,
   $wiki_options             = {},
-  $php_installation         = 'scl56',
+  $php_installation         = 'scl72',
   $documentroot_owner       = root,
   $documentroot_group       = apache,
   $documentroot_mode        = '0640',
