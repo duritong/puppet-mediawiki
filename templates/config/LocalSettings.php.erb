@@ -4,8 +4,6 @@
 # If you make manual changes, please keep track in case you need to
 # recreate them later.
 
-$IP = "<%= @path %>";
-ini_set( "include_path", ".:$IP:$IP/includes:$IP/languages" );
 require_once( "includes/DefaultSettings.php" );
 
 $wgSitename         = "<%= @sitename %>";
@@ -106,10 +104,9 @@ $wgSecretKey = "<%= @real_secret_key %>";
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'standard', 'nostalgia', 'cologneblue', 'monobook':
 # $wgDefaultSkin = 'monobook';
-require_once "$IP/skins/CologneBlue/CologneBlue.php";
-require_once "$IP/skins/Modern/Modern.php";
-require_once "$IP/skins/MonoBook/MonoBook.php";
-require_once "$IP/skins/Vector/Vector.php";
+wfLoadSkin( 'MonoBook' );
+wfLoadSkin( 'Timeless' );
+wfLoadSkin( 'Vector' );
 
 ## Specify who can edit: true means only logged in users may edit pages
 $wgWhitelistEdit = true;

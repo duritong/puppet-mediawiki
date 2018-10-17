@@ -223,9 +223,10 @@ define mediawiki::instance(
           $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
           exec{"install_mediawiki_${name}":
-            command => $install_cmd,
-            unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
-            require => File["${path}/LocalSettings.php"];
+            environment => "MW_INSTALL_PATH=${path}",
+            command     => $install_cmd,
+            unless      => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
+            require     => File["${path}/LocalSettings.php"];
           } -> file{"/var/www/vhosts/${name}/data/php_update_command":
             content => $php_update_cmd,
             owner   => root,

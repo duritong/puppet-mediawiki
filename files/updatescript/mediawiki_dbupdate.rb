@@ -12,9 +12,9 @@ def update_php(dir)
     File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance") unless File.exists?("#{dir}/maintenance")
     # make sure we do not have a tampered update_command before running it
     if File.exists?(update_cmd_file = File.expand_path("#{dir}/../data/php_update_command")) && ((s=File.stat(update_cmd_file)).uid == 0) && (sprintf("%o",s.mode) == "100644")
-      run(File.read(update_cmd_file))
+      run("MW_INSTALL_PATH=#{dir} #{File.read(update_cmd_file)}")
     else
-      run("php #{dir}/maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
+      run("MW_INSTALL_PATH=#{dir} php #{dir}/maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
     end
     FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   end
