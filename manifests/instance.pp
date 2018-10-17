@@ -210,20 +210,20 @@ define mediawiki::instance(
         }
         if $autoinstall {
           $admin_pass = trocla("mediawiki_${name}_admin",'plain')
-          $install_command = "php /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
-          if $php_installation =~ /^scl/ {
-            $inst = regsubst($php_installation,'^scl','php')
-            require "::php::scl::${inst}"
-            $php_basedir = getvar("php::scl::${inst}::basedir")
-            $php_install_cmd = "bash -c \"source ${php_basedir}/enable && ${install_command}\""
-            $php_update_cmd = "source ${php_basedir}/enable && php ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
+
+          if $php_installation == 'system' {
+            $php_bin = 'php'
           } else {
-            $php_install_cmd = $install_command
-            $php_update_cmd = "php ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
+            $php_inst = regsubst($php_installation,'^scl','php')
+            require "::php::scl::${php_inst}"
+            $scl_name = getvar("php::scl::${php_inst}::scl_name")
+            $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
           }
+          $install_cmd = "${php_bin} /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+          $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
           exec{"install_mediawiki_${name}":
-            command => $php_install_cmd,
+            command => $install_cmd,
             unless  => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
             require => File["${path}/LocalSettings.php"];
           } -> file{"/var/www/vhosts/${name}/data/php_update_command":
