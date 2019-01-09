@@ -156,6 +156,7 @@ $wgSecureLogin = true;
 # enable extensions
 wfLoadExtension( 'MobileFrontend' );
 $wgMFAutodetectMobileView = true;
+$wgMFDefaultSkinClass = 'SkinTimeless';
 <%
 unless @extensions == 'absent'
   @extensions.each do |extension| -%>
