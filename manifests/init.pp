@@ -20,7 +20,7 @@ class mediawiki(
   $git_repo    = 'https://code.immerda.ch/immerda/managed-apps/mediawiki.git',
 ) {
   case $mediawiki::install_src {
-    'git': { include mediawiki::git }
-    default: { include mediawiki::base }
+    'git': { include ::mediawiki::git }
+    default: { include ::mediawiki::base }
   }
 }

@@ -159,85 +159,82 @@ define mediawiki::instance(
       }
     }
 
-    case $config {
-      'file': {
-        mediawiki::config{
-          'LocalSettings.php':
-            mediawiki_name => $name,
-            dst_path       => $path,
-            owner          => $documentroot_owner,
-            group          => $documentroot_group,
-            mode           => $documentroot_mode;
-        }
+    if $config == 'file' {
+      mediawiki::config{
+        'LocalSettings.php':
+          mediawiki_name => $name,
+          dst_path       => $path,
+          owner          => $documentroot_owner,
+          group          => $documentroot_group,
+          mode           => $documentroot_mode;
       }
-      'template': {
-        if ($db_server=='unmanaged') or ($db_name=='unmanaged') or ($db_user=='unmanaged') or ($db_pwd=='unmanaged') or ($contact=='unmanaged') or ($sitename=='unmanaged') or ($secret_key=='unmanaged'){
-          fail("you have to set all necessary variables for ${name} on ${facts['fqdn']} to deploy it in template mode! (db_server: ${db_server} - db_name: ${db_name} - db_user: ${db_user} - db_pwd: ${db_pwd} - contact: ${contact} - sitename: ${sitename} - secret_key: ${secret_key})")
-        }
+    } elsif $config == 'template' {
+      if ($db_server=='unmanaged') or ($db_name=='unmanaged') or ($db_user=='unmanaged') or ($db_pwd=='unmanaged') or ($contact=='unmanaged') or ($sitename=='unmanaged') or ($secret_key=='unmanaged'){
+        fail("you have to set all necessary variables for ${name} on ${facts['fqdn']} to deploy it in template mode! (db_server: ${db_server} - db_name: ${db_name} - db_user: ${db_user} - db_pwd: ${db_pwd} - contact: ${contact} - sitename: ${sitename} - secret_key: ${secret_key})")
+      }
 
-        case $secret_key {
-          'trocla': { $real_secret_key = trocla("mediawiki_${name}_secret_key",'plain','length: 32') }
-          default: { $real_secret_key = $secret_key }
-        }
-        case $db_user {
-          'db_name': { $real_db_user = $db_name }
-          default: { $real_db_user = $db_user }
-        }
-        case $db_pwd {
-          'trocla': { $real_db_pwd = trocla("mysql_${real_db_user}",'plain') }
-          default: { $real_db_pwd = $db_pwd }
-        }
+      case $secret_key {
+        'trocla': { $real_secret_key = trocla("mediawiki_${name}_secret_key",'plain','length: 32') }
+        default: { $real_secret_key = $secret_key }
+      }
+      case $db_user {
+        'db_name': { $real_db_user = $db_name }
+        default: { $real_db_user = $db_user }
+      }
+      case $db_pwd {
+        'trocla': { $real_db_pwd = trocla("mysql_${real_db_user}",'plain') }
+        default: { $real_db_pwd = $db_pwd }
+      }
 
-        $std_wiki_options = {
-          anyone_can_edit      => false,
-          anyone_can_register  => true,
-          enable_email         => true,
-          enable_user_email    => false,
-          email_authentication => false,
-        }
-        $real_wiki_options = merge($std_wiki_options, $wiki_options)
+      $std_wiki_options = {
+        anyone_can_edit      => false,
+        anyone_can_register  => true,
+        enable_email         => true,
+        enable_user_email    => false,
+        email_authentication => false,
+      }
+      $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
-        file{
-          "${path}/LocalSettings.php":
-            content => template('mediawiki/config/LocalSettings.php.erb'),
-            require => Mediawiki::File["${path}/index.php"],
-            owner   => $documentroot_owner,
-            group   => $documentroot_group,
-            mode    => $documentroot_mode;
-        }
-        File["${path}/LocalSettings.php"]{
-          # it does not need to be writeable
-          seltype => 'httpd_sys_content_t',
-        }
-        if $autoinstall {
-          $admin_pass = trocla("mediawiki_${name}_admin",'plain')
+      file{
+        "${path}/LocalSettings.php":
+          content => template('mediawiki/config/LocalSettings.php.erb'),
+          require => Mediawiki::File["${path}/index.php"],
+          owner   => $documentroot_owner,
+          group   => $documentroot_group,
+          mode    => $documentroot_mode;
+      }
+      File["${path}/LocalSettings.php"]{
+        # it does not need to be writeable
+        seltype => 'httpd_sys_content_t',
+      }
+      if $autoinstall {
+        $admin_pass = trocla("mediawiki_${name}_admin",'plain')
 
-          if $php_installation == 'system' {
-            $php_bin = 'php'
-          } else {
-            $php_inst = regsubst($php_installation,'^scl','php')
-            require "::php::scl::${php_inst}"
-            $scl_name = getvar("php::scl::${php_inst}::scl_name")
-            $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
-          }
-          $install_cmd = "${php_bin} /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
-          $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
+        if $php_installation == 'system' {
+          $php_bin = 'php'
+        } else {
+          $php_inst = regsubst($php_installation,'^scl','php')
+          require "::php::scl::${php_inst}"
+          $scl_name = getvar("php::scl::${php_inst}::scl_name")
+          $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
+        }
+        $install_cmd = "${php_bin} /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+        $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
-          exec{"install_mediawiki_${name}":
-            environment => "MW_INSTALL_PATH=${path}",
-            command     => $install_cmd,
-            unless      => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
-            require     => File["${path}/LocalSettings.php"];
-          } -> file{"/var/www/vhosts/${name}/data/php_update_command":
-            content => $php_update_cmd,
-            owner   => root,
-            group   => 0,
-            mode    => '0644';
-          }
-          if $db_server in ['localhost','127.0.0.1','::1'] {
-            Mysql_database<| title == $db_name |>  -> Exec["install_mediawiki_${name}"]
-            Mysql_user<| title == $real_db_user |> -> Exec["install_mediawiki_${name}"]
-          }
+        exec{"install_mediawiki_${name}":
+          environment => "MW_INSTALL_PATH=${path}",
+          command     => $install_cmd,
+          unless      => "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'",
+          require     => File["${path}/LocalSettings.php"];
+        } -> file{"/var/www/vhosts/${name}/data/php_update_command":
+          content => $php_update_cmd,
+          owner   => root,
+          group   => 0,
+          mode    => '0644';
+        }
+        if $db_server in ['localhost','127.0.0.1','::1'] {
+          Mysql_database<| title == $db_name |>  -> Exec["install_mediawiki_${name}"]
+          Mysql_user<| title == $real_db_user |> -> Exec["install_mediawiki_${name}"]
         }
       }
     }
