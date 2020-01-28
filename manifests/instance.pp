@@ -108,6 +108,7 @@ define mediawiki::instance(
         "${path}/opensearch_desc.php",
         "${path}/profileinfo.php",
         "${path}/resources",
+        "${path}/rest.php",
         "${path}/serialized",
         "${path}/skins",
         "${path}/thumb_handler.php",

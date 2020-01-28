@@ -17,7 +17,7 @@
 # - git_repo: Git Repository from where to install the mediawiki
 class mediawiki(
   $install_src = 'git',
-  $git_repo    = 'https://git.immerda.ch/imediawiki.git',
+  $git_repo    = 'https://code.immerda.ch/immerda/managed-apps/mediawiki.git',
 ) {
   case $mediawiki::install_src {
     'git': { include mediawiki::git }
