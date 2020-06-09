@@ -52,7 +52,7 @@ define mediawiki::instance(
   $documentroot_mode        = '0640',
   $documentroot_write_mode  = '0660'
 ){
-  include ::mediawiki
+  include mediawiki
 
   case $mediawiki::install_src {
     'git': { $basedir = '/var/www/mediawiki' }
@@ -97,7 +97,7 @@ define mediawiki::instance(
         group  => $documentroot_group,
         mode   => $documentroot_write_mode;
     }
-    if str2bool($::selinux) {
+    if str2bool($facts['selinux']) {
       File[$path, "${path}/images", "${path}/cache" ]{
         seltype => 'httpd_sys_rw_content_t',
       }
@@ -144,11 +144,8 @@ define mediawiki::instance(
     }
 
     if ('Math/Math' in $extensions) or $spam_protection {
-      require ::mediawiki::math
-      $latex_fmt_source = $::operatingsystemmajrelease ? {
-        '5'     => '/root/.texmf-var/web2c/latex.fmt',
-        default => '/var/lib/texmf/web2c/pdftex/latex.fmt'
-      }
+      require mediawiki::math
+      $latex_fmt_source = '/var/lib/texmf/web2c/pdftex/latex.fmt'
       file{
         "${path}/images/tmp":
           ensure => directory,
@@ -161,7 +158,7 @@ define mediawiki::instance(
           group  => $documentroot_group,
           mode   => $documentroot_mode;
       }
-      if str2bool($::selinux) {
+      if str2bool($facts['selinux']) {
         File["${path}/images/tmp","${path}/images/tmp/latex.fmt"]{
           seltype => 'httpd_sys_rw_content_t',
         }
