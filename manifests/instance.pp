@@ -37,7 +37,6 @@ define mediawiki::instance(
   $contact                  = 'unmanaged',
   $sitename                 = 'unmanaged',
   $secret_key               = 'unmanaged',
-  $server                   = $name,
   $ssl_mode                 = false,
   $autoinstall              = true,
   $squid_servers            = 'absent',
@@ -67,6 +66,16 @@ define mediawiki::instance(
       ensure => absent,
     }
   } else {
+    $std_wiki_options = {
+      anyone_can_edit      => false,
+      anyone_can_register  => true,
+      enable_email         => true,
+      enable_user_email    => false,
+      email_authentication => false,
+    }
+    $real_wiki_options = merge($std_wiki_options, $wiki_options)
+
+    $server = pick($real_wiki_options['server'],$name)
     $canonical_server = $ssl_mode ? {
       'force' => "https://${server}",
       'only'  => "https://${server}",
@@ -185,15 +194,6 @@ define mediawiki::instance(
         'trocla': { $real_db_pwd = trocla("mysql_${real_db_user}",'plain') }
         default: { $real_db_pwd = $db_pwd }
       }
-
-      $std_wiki_options = {
-        anyone_can_edit      => false,
-        anyone_can_register  => true,
-        enable_email         => true,
-        enable_user_email    => false,
-        email_authentication => false,
-      }
-      $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
       file{
         "${path}/LocalSettings.php":
