@@ -190,7 +190,8 @@ define mediawiki::instance(
           $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
         }
         if 'MW-OAuth2Client' in $extensions {
-          $ext_cmd = "pushd ${path}/extensions/MW-OAuth2Client/vendors/oauth2-client && ${php_bin} /usr/bin/composer install && popd && "
+          include php::composer
+          $ext_cmd = "pushd ${path}/extensions/MW-OAuth2Client/vendors/oauth2-client && ${php_bin} -d allow_url_fopen=1 /usr/bin/composer install && popd && "
         } else {
           $ext_cmd = undef
         }
