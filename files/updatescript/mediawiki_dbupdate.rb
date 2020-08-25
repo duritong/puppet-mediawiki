@@ -42,7 +42,14 @@ def run(cmd)
 end
 
 def wikis
-  Dir['/var/www/vhosts/*/www/LocalSettings.php'].map{|f| File.dirname(f) }
+  Dir["/var/www/vhosts/#{wiki_sel}/www/LocalSettings.php"].map{|f| File.dirname(f) }.select{|d| File.directory?(File.join(d,'.git')) }
+end
+
+def wiki_sel
+  if ARGV.length == 0
+    '*'
+  else
+    "{#{ARGV.join(',')}}"
 end
 
 def sudo(uid,gid,&blk)
@@ -66,13 +73,9 @@ def security_fail(msg)
 end
 
 wikis.each do |dir|
-  if File.directory?(File.join(dir,'.git'))
-    puts "processing wiki: #{dir}"
-    update_php(dir)
-    puts 'done.'
-  else
-    puts "No git directory in #{dir} - Skipping..."
-  end
+  puts "processing wiki: #{File.basename(File.dirname(dir))}"
+  update_php(dir)
+  puts 'done.'
 end
 puts 'All done!'
 
