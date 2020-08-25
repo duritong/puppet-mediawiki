@@ -103,15 +103,17 @@ define mediawiki::instance(
         submodules      => true,
         cloneddir_user  => $documentroot_owner,
         cloneddir_group => $documentroot_group,
-    } -> file{
+    }
+    file{
       default:
         ensure => directory,
         owner  => $documentroot_owner,
         group  => $documentroot_group;
       $path:
-        mode   => $documentroot_mode;
+        mode => $documentroot_mode;
       [ "${path}/images", "${path}/cache" ]:
-        mode   => $documentroot_write_mode;
+        require => Git::Clone[$path],
+        mode    => $documentroot_write_mode;
     }
 
     if ($image != 'absent') {
@@ -190,6 +192,7 @@ define mediawiki::instance(
         $install_cmd = "${php_bin} ${path}/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
         $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
+        Git::Clone[$path] -> File["${path}/LocalSettings.php"]
         exec{"install_mediawiki_${name}":
           environment => "MW_INSTALL_PATH=${path}",
           command     => $install_cmd,
