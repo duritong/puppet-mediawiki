@@ -188,8 +188,15 @@ $wgDefaultUserOptions['wikieditor-publish'] = 1;
 # WYSIWYG/WYSIWYG.php
 $wgGroupPermissions['*']['wysiwyg']=true;
 <% end -%>
-<% if @real_wiki_options.key?('plain_options') -%>
+<% if @real_wiki_options.key?('plain_options')
+  plain_options = @real_wiki_options['plain_options']
+  trocla_keys = plain_options.scan(/%%TROCLA_[\w_\-]+%%/)
+  trocla_keys.each do |k|
+    tk = k.match(/%%TROCLA_([\w_\-]+)%%/)[1]
+    plain_options.gsub!(k,scope.call_function('trocla', ["mediawiki_#{@name}_#{tk}",'plain']))
+  end
+-%>
 
-<%= @real_wiki_options['plain_options'] %>
+<%= plain_options %>
 <% end -%>
 ?>
