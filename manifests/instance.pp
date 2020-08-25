@@ -55,7 +55,8 @@ define mediawiki::instance(
     $squid_servers            = 'absent',
   Boolean
     $hashed_upload_dir        = true,
-
+  Boolean
+    $spam_protection          = false,
   Variant[Enum['absent'],Array[String,1]]
     $file_extensions          = 'absent',
   Variant[Enum['absent'],Array[String,1]]
@@ -123,6 +124,22 @@ define mediawiki::instance(
       }
     }
 
+    if ('Math/Math' in $extensions) or $spam_protection {
+      require mediawiki::math
+      $latex_fmt_source = '/var/lib/texmf/web2c/pdftex/latex.fmt'
+      file{
+        "${path}/images/tmp":
+          ensure => directory,
+          owner  => $documentroot_owner,
+          group  => $documentroot_group,
+          mode   => $documentroot_write_mode;
+        "${path}/images/tmp/latex.fmt":
+          source => $latex_fmt_source,
+          owner  => $documentroot_owner,
+          group  => $documentroot_group,
+          mode   => $documentroot_mode;
+      }
+    }
     if $config == 'file' {
       mediawiki::config{
         'LocalSettings.php':
