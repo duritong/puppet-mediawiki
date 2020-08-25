@@ -189,8 +189,13 @@ define mediawiki::instance(
           $scl_name = getvar("php::scl::${php_inst}::scl_name")
           $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
         }
-        $install_cmd = "${php_bin} ${path}/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
-        $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
+        if 'MW-OAuth2Client' in $extensions {
+          $ext_cmd = "pushd ${path}/extensions/MW-OAuth2Client/vendors/oauth2-client && ${php_bin} /usr/bin/composer install && popd && "
+        } else {
+          $ext_cmd = undef
+        }
+        $install_cmd = "${ext_cmd}${php_bin} ${path}/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+        $php_update_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
         Git::Clone[$path] -> File["${path}/LocalSettings.php"]
         exec{"install_mediawiki_${name}":
