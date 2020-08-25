@@ -2,14 +2,14 @@
 
 require 'fileutils'
 
-load File.dirname(__FILE__) + "/mediawiki_dbupdate.config.rb"
+VHOSTS_BASE = '/var/www/vhosts'
 
 def update_php(dir)
   old_dir = Dir.getwd
   Dir.chdir(dir)
   stat = File.stat(dir)
   sudo(stat.uid, stat.gid) do
-    File.symlink("#{MEDIAWIKI_SOURCE}/maintenance","#{dir}/maintenance") unless File.exists?("#{dir}/maintenance")
+    run('git pull && git submodule sync && git submodule update --init')
     # make sure we do not have a tampered update_command before running it
     if File.exists?(update_cmd_file = File.expand_path("#{dir}/../data/php_update_command")) && ((s=File.stat(update_cmd_file)).uid == 0) && (sprintf("%o",s.mode) == "100644")
       run("MW_INSTALL_PATH=#{dir} #{File.read(update_cmd_file)}")
@@ -23,7 +23,7 @@ def update_php(dir)
   if File.directory?(d)
     stat = File.stat(d)
     sudo(stat.uid, stat.gid) do
-      run("find #{File.join(dir,'cache')} -name '*.html' -type f -delete")
+      run("find #{File.join(dir,'cache')} -name '*.html' -P -type f -delete")
     end
   end
   Dir.chdir(old_dir)
@@ -42,9 +42,7 @@ def run(cmd)
 end
 
 def wikis
-  `ls -1 #{VHOSTS_BASE}/*/www/LocalSettings.php`.split("\n").collect{|f|
-    File.dirname(f)
-  }.select{|f| File.symlink?(File.join(f,'index.php')) }
+  Dir['/var/www/vhosts/*/www/LocalSettings.php'].map{|f| File.dirname(f) }
 end
 
 def sudo(uid,gid,&blk)
@@ -67,19 +65,14 @@ def security_fail(msg)
   exit 1
 end
 
-if File.directory?(File.join(MEDIAWIKI_SOURCE,'.git'))
-  puts 'updating git...'
-  old_dir = Dir.getwd
-  Dir.chdir(MEDIAWIKI_SOURCE)
-  run('git pull && git submodule update --init')
-  puts 'done'
-  Dir.chdir(old_dir)
-end
-
 wikis.each do |dir|
-  puts "processing wiki: #{dir}"
-  update_php(dir)
-  puts 'done.'
+  if File.directory?(File.join(dir,'.git'))
+    puts "processing wiki: #{dir}"
+    update_php(dir)
+    puts 'done.'
+  else
+    puts "No git directory in #{dir} - Skipping..."
+  end
 end
 puts 'All done!'
 

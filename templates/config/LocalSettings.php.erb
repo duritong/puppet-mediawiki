@@ -90,8 +90,6 @@ $wgHashedUploadDirectory = false;
 ## If you have the appropriate support software installed
 ## you can enable inline LaTeX equations:
 # $wgUseTeX         = true;
-$wgMathPath         = "$wgUploadPath/math";
-$wgMathDirectory    = "$wgUploadDirectory/math";
 $wgTmpDirectory     = "$wgUploadDirectory/tmp";
 putenv("TMPDIR=$IP/images/temp");
 
@@ -162,13 +160,6 @@ unless @extensions == 'absent'
   @extensions.each do |extension| -%>
 wfLoadExtension('<%= extension %>');
 <%
-  end
-end
-if @spam_protection
-  [ 'Math', 'ConfirmEdit/MathCaptcha' ].each do |spam_ext|
-    unless @extensions.include?(spam_ext) -%>
-wfLoadExtension('<%= spam_ext %>');
-<%  end
   end
 end -%>
 <% if @extensions.include?('WikiEditor') -%>

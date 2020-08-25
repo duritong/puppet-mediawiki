@@ -27,45 +27,59 @@
 # language: language of the wiki
 #   - default: de
 define mediawiki::instance(
-  $ensure                   = present,
-  $image                    = 'absent',
-  $config                   = 'unmanaged',
-  $db_server                = 'unmanaged',
-  $db_name                  = 'unmanaged',
-  $db_user                  = 'db_name',
-  $db_pwd                   = 'unmanaged',
-  $contact                  = 'unmanaged',
-  $sitename                 = 'unmanaged',
-  $secret_key               = 'unmanaged',
-  $ssl_mode                 = false,
-  $autoinstall              = true,
-  $squid_servers            = 'absent',
-  $hashed_upload_dir        = true,
-  $file_extensions          = 'absent',
-  $extensions               = 'absent',
-  $language                 = 'de',
-  $spam_protection          = false,
-  $wiki_options             = {},
-  $php_installation         = 'scl72',
-  $documentroot_owner       = root,
-  $documentroot_group       = apache,
-  $documentroot_mode        = '0640',
-  $documentroot_write_mode  = '0660'
+  Enum['absent','present']
+    $ensure                   = present,
+  String
+    $image                    = 'absent',
+  String
+    $config                   = 'unmanaged',
+  String
+    $db_server                = 'unmanaged',
+  String
+    $db_name                  = 'unmanaged',
+  String
+    $db_user                  = 'db_name',
+  String
+    $db_pwd                   = 'unmanaged',
+  String
+    $contact                  = 'unmanaged',
+  String
+    $sitename                 = 'unmanaged',
+  String
+    $secret_key               = 'unmanaged',
+  Variant[Boolean,Enum['force']]
+    $ssl_mode                 = false,
+  Boolean
+    $autoinstall              = true,
+  Variant[Enum['absent'],Array[String,1]]
+    $squid_servers            = 'absent',
+  Boolean
+    $hashed_upload_dir        = true,
+
+  Variant[Enum['absent'],Array[String,1]]
+    $file_extensions          = 'absent',
+  Variant[Enum['absent'],Array[String,1]]
+    $extensions               = 'absent',
+  String
+    $language                 = 'de',
+  Hash
+    $wiki_options             = {},
+  Variant[Enum['system'],Pattern[/^scl\d+$/]]
+    $php_installation         = 'scl74',
+  String
+    $documentroot_owner       = root,
+  String
+    $documentroot_group       = apache,
+  Stdlib::Filemode
+    $documentroot_mode        = '0640',
+  Stdlib::Filemode
+    $documentroot_write_mode  = '0660'
 ){
   include mediawiki
 
-  case $mediawiki::install_src {
-    'git': { $basedir = '/var/www/mediawiki' }
-    default: { $basedir = '/usr/share/mediawiki' }
-  }
-
   $path = "/var/www/vhosts/${name}/www"
 
-  if ($ensure == 'absent') {
-    file{$path:
-      ensure => absent,
-    }
-  } else {
+  if ($ensure != 'absent') {
     $std_wiki_options = {
       anyone_can_edit      => false,
       anyone_can_register  => true,
@@ -81,54 +95,22 @@ define mediawiki::instance(
       'only'  => "https://${server}",
       default => "http://${server}"
     }
-    file{
+    git::clone{
       $path:
-        ensure       => directory,
-        recurse      => true,
-        recurselimit => 1,
-        purge        => true,
-        force        => true,
-        owner        => $documentroot_owner,
-        group        => $documentroot_group,
-        mode         => $documentroot_mode;
-      [ "${path}/images", "${path}/cache" ]:
+        git_repo        => $mediawiki::git_repo,
+        clone_depth     => 1,
+        submodules      => true,
+        cloneddir_user  => $documentroot_owner,
+        cloneddir_group => $documentroot_group,
+    } -> file{
+      default:
         ensure => directory,
         owner  => $documentroot_owner,
-        group  => $documentroot_group,
+        group  => $documentroot_group;
+      $path:
+        mode   => $documentroot_mode;
+      [ "${path}/images", "${path}/cache" ]:
         mode   => $documentroot_write_mode;
-    }
-    if str2bool($facts['selinux']) {
-      File[$path, "${path}/images", "${path}/cache" ]{
-        seltype => 'httpd_sys_rw_content_t',
-      }
-    }
-
-    mediawiki::file{
-      [
-        "${path}/api.php",
-        "${path}/autoload.php",
-        "${path}/extensions",
-        "${path}/img_auth.php",
-        "${path}/includes",
-        "${path}/index.php",
-        "${path}/languages",
-        "${path}/load.php",
-        "${path}/mw-config",
-        "${path}/opensearch_desc.php",
-        "${path}/profileinfo.php",
-        "${path}/resources",
-        "${path}/rest.php",
-        "${path}/serialized",
-        "${path}/skins",
-        "${path}/thumb_handler.php",
-        "${path}/thumb.php",
-        "${path}/vendor",
-      ]:
-        src_path => $basedir;
-      "${path}/images/.htaccess":
-        src_path => "${basedir}/images";
-      "${path}/cache/.htaccess":
-        src_path => "${basedir}/cache";
     }
 
     if ($image != 'absent') {
@@ -138,30 +120,6 @@ define mediawiki::instance(
         owner          => $documentroot_owner,
         group          => $documentroot_group,
         mode           => $documentroot_mode;
-      }
-    } else {
-      mediawiki::file{"${path}/Wiki.png": src_path => $basedir, }
-    }
-
-    if ('Math/Math' in $extensions) or $spam_protection {
-      require mediawiki::math
-      $latex_fmt_source = '/var/lib/texmf/web2c/pdftex/latex.fmt'
-      file{
-        "${path}/images/tmp":
-          ensure => directory,
-          owner  => $documentroot_owner,
-          group  => $documentroot_group,
-          mode   => $documentroot_write_mode;
-        "${path}/images/tmp/latex.fmt":
-          source => $latex_fmt_source,
-          owner  => $documentroot_owner,
-          group  => $documentroot_group,
-          mode   => $documentroot_mode;
-      }
-      if str2bool($facts['selinux']) {
-        File["${path}/images/tmp","${path}/images/tmp/latex.fmt"]{
-          seltype => 'httpd_sys_rw_content_t',
-        }
       }
     }
 
@@ -195,14 +153,11 @@ define mediawiki::instance(
       file{
         "${path}/LocalSettings.php":
           content => template('mediawiki/config/LocalSettings.php.erb'),
-          require => Mediawiki::File["${path}/index.php"],
+          # it does not need to be writeable
+          seltype => 'httpd_sys_content_t',
           owner   => $documentroot_owner,
           group   => $documentroot_group,
           mode    => $documentroot_mode;
-      }
-      File["${path}/LocalSettings.php"]{
-        # it does not need to be writeable
-        seltype => 'httpd_sys_content_t',
       }
       if $autoinstall {
         $admin_pass = trocla("mediawiki_${name}_admin",'plain')
@@ -215,7 +170,7 @@ define mediawiki::instance(
           $scl_name = getvar("php::scl::${php_inst}::scl_name")
           $php_bin = "/usr/bin/scl enable ${scl_name} -- php"
         }
-        $install_cmd = "${php_bin} /var/www/mediawiki/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+        $install_cmd = "${php_bin} ${path}/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
         $php_update_cmd = "${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
 
         exec{"install_mediawiki_${name}":

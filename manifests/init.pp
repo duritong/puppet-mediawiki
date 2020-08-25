@@ -10,17 +10,18 @@
 #
 
 # Variables:
-# - install_src: The source of mediawiki
-#   git: clone it from a git repository (Requires mediawiki_git_repo)
-#   default: install it by package
-#
 # - git_repo: Git Repository from where to install the mediawiki
 class mediawiki(
-  $install_src = 'git',
-  $git_repo    = 'https://code.immerda.ch/immerda/managed-apps/mediawiki.git',
+  Stdlib::HTTPSUrl $git_repo = 'https://code.immerda.ch/immerda/managed-apps/mediawiki.git',
 ) {
-  case $mediawiki::install_src {
-    'git': { include ::mediawiki::git }
-    default: { include ::mediawiki::base }
+  require git
+  require ruby::mysql
+
+  file{
+    '/usr/local/sbin/upgrade-mediawikis.rb':
+      source => 'puppet:///modules/mediawiki/updatescript/mediawiki_dbupdate.rb',
+      owner  => root,
+      group  => 0,
+      mode   => '0700';
   }
 }
