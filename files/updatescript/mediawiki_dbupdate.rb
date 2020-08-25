@@ -16,14 +16,13 @@ def update_php(dir)
     else
       run("MW_INSTALL_PATH=#{dir} php #{dir}/maintenance/update.php --quick --conf #{dir}/LocalSettings.php")
     end
-    FileUtils.remove_entry_secure("#{dir}/maintenance", true)
   end
   # history folder is owned by the run user
   d = File.join(dir,'cache','history')
   if File.directory?(d)
     stat = File.stat(d)
     sudo(stat.uid, stat.gid) do
-      run("find #{File.join(dir,'cache')} -name '*.html' -P -type f -delete")
+      run("find #{File.join(dir,'cache')} -name '*.html' -type f -delete")
     end
   end
   Dir.chdir(old_dir)
@@ -50,6 +49,7 @@ def wiki_sel
     '*'
   else
     "{#{ARGV.join(',')}}"
+  end
 end
 
 def sudo(uid,gid,&blk)
