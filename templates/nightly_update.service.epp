@@ -1,0 +1,23 @@
+<%- | String $name,
+| -%>
+[Unit]
+Description=Update mediawiki instance <%= $name %>
+
+OnFailure=status_email_root@%n.service
+
+[Service]
+Type=oneshot
+
+SyslogIdentifier=mediawiki-update-<%= $name %>
+
+ExecStart=/usr/local/sbin/upgrade-mediawikis.rb <%= $name %>
+
+# security settings
+PrivateTmp=true
+
+ProtectSystem=full
+# to be migrated once in EL7
+# ProtectSystem=strict
+
+ReadOnlyDirectories=/
+ReadWriteDirectories=/var/www/vhosts/<%= $name %>

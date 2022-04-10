@@ -80,6 +80,14 @@ define mediawiki::instance(
 
   $path = "/var/www/vhosts/${name}/www"
 
+  if ($wiki_options['nightly_update'] != false) and ($ensure == 'present') {
+    $ensure_nightly_update = 'present'
+  } else {
+    $ensure_nightly_update = 'absent'
+  }
+  systemd::timer { "mw-update-${name}.timer":
+    ensure => $ensure_nightly_update,
+  }
   if ($ensure != 'absent') {
     $std_wiki_options = {
       anyone_can_edit      => false,
@@ -213,6 +221,20 @@ define mediawiki::instance(
         if $db_server in ['localhost','127.0.0.1','::1'] {
           Mysql_database<| title == $db_name |>  -> Exec["install_mediawiki_${name}"]
           Mysql_user<| title == $real_db_user |> -> Exec["install_mediawiki_${name}"]
+        }
+      }
+
+      if $ensure_nightly_update == 'present' {
+        require systemd::mail_on_failure
+        $update_timer_params = pick($wiki_options['nightly_update_timer'],{})
+        $update_service_params = pick($wiki_options['nightly_update_service'],{}) + {
+          name => $name,
+        }
+        Systemd::Timer["mw-update-${name}.timer"] {
+          timer_content   => epp('mediawiki/nightly_update.timer.epp', $update_timer_params),
+          service_content => epp('mediawiki/nightly_update.service.epp', $update_service_params),
+          active          => true,
+          enable          => true,
         }
       }
     }
