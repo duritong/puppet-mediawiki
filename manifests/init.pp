@@ -15,6 +15,7 @@ class mediawiki(
   Stdlib::HTTPSUrl $git_repo = 'https://code.immerda.ch/immerda/managed-apps/mediawiki.git',
 ) {
   require git
+  require ruby::mysql
 
   file{
     '/usr/local/sbin/upgrade-mediawikis.rb':
