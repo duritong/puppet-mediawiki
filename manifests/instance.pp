@@ -203,7 +203,7 @@ define mediawiki::instance(
         } else {
           $ext_cmd = undef
         }
-        $install_cmd = "${ext_cmd}${php_bin} ${path}/mainteance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+        $install_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
         $php_update_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
         if versioncmp($facts['os']['release']['major'],'9') < 0 {
           $check_db_command = "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'"
