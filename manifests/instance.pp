@@ -99,11 +99,7 @@ define mediawiki::instance(
     $real_wiki_options = merge($std_wiki_options, $wiki_options)
 
     $server = pick($real_wiki_options['server'],$name)
-    $canonical_server = $ssl_mode ? {
-      'force' => "https://${server}",
-      'only'  => "https://${server}",
-      default => "http://${server}"
-    }
+    $canonical_server = "https://${server}"
     git::clone{
       $path:
         git_repo        => $mediawiki::git_repo,
@@ -203,7 +199,7 @@ define mediawiki::instance(
         } else {
           $ext_cmd = undef
         }
-        $install_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / '${sitename}' admin"
+        $install_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/install.php --dbserver ${db_server} --confpath ${path}/LocalSettings.php --dbname ${db_name} --dbuser ${real_db_user} --dbpass '${$real_db_pwd}' --lang ${language} --pass '${admin_pass}' --scriptpath / --server  ${canonical_server} '${sitename}' admin"
         $php_update_cmd = "${ext_cmd}${php_bin} ${path}/maintenance/update.php --quick --conf ${path}/LocalSettings.php"
         if versioncmp($facts['os']['release']['major'],'9') < 0 {
           $check_db_command = "ruby -rrubygems -rmysql -e 'c = Mysql.real_connect(\"${db_server}\",\"${real_db_user}\",\"${real_db_pwd}\",\"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").fetch_row.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").fetch_row[0].to_i > 0)'"
@@ -211,12 +207,11 @@ define mediawiki::instance(
           $check_db_command = "ruby -rrubygems -rmysql2 -e 'c = Mysql2::Client.new(host: \"${db_server}\",username: \"${real_db_user}\",password: \"${real_db_pwd}\",database: \"${db_name}\"); exit (! c.query(\"SHOW TABLES LIKE \\\"user\\\";\").first.nil? && c.query(\"SELECT COUNT(user_id) FROM user;\").first.values.first.to_i > 0)'"
         }
 
-        Git::Clone[$path] -> File["${path}/LocalSettings.php"]
-        exec{"install_mediawiki_${name}":
+        Git::Clone[$path] -> exec{"install_mediawiki_${name}":
           environment => "MW_INSTALL_PATH=${path}",
           command     => $install_cmd,
           unless      => $check_db_command,
-          require     => File["${path}/LocalSettings.php"];
+          before      => File["${path}/LocalSettings.php"];
         } -> file{"/var/www/vhosts/${name}/data/php_update_command":
           content => $php_update_cmd,
           owner   => root,
